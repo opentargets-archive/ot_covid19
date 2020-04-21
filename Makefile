@@ -38,6 +38,8 @@ DATADIR= $(ROOTDIR)/temp
 # bins
 CURL ?= $(shell which curl)
 GUNZIP ?= $(shell which gunzip)
+JQ ?= $(shell which jq)
+SED ?= $(shell which sed)
 
 #################################
 # Relevant files
@@ -48,20 +50,24 @@ OTTRACTABILITY=$(TEMPDIR)/ot_tractability.tsv
 OTSAFETY=$(TEMPDIR)/ot_safety.json
 OTBASELINE=$(TEMPDIR)/ot_baseline.txt
 OTEVIDENCE=$(TEMPDIR)/ot_evidence.json
+OTDRUGEVIDENCE=$(TEMPDIR)/ot_drug_evidence.tsv
 COVIDCOMPLEX=$(TEMPDIR)/complex_sars-cov-2.tsv  
 INTACTCOVID=$(TEMPDIR)/IntAct_SARS-COV-2_interactions.tsv
 
 #### Phony targets
-.PHONY: all downloads create-temp
+.PHONY: all downloads create-temp parsers
 
 # ALL
-all: create-temp downloads
+all: create-temp downloads parsers
 
 #############
 # Downloads
 #############
 
 downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID)
+
+## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
+parsers: $(OTDRUGEVIDENCE)
 
 # CREATES TEMPORARY DIRECTORY
 create-temp:
@@ -81,6 +87,9 @@ $(OTBASELINE):
 
 $(OTEVIDENCE):
 	$(CURL) $(OTEVIDENCEBUCKET) | $(GUNZIP) -c > $@
+
+$(OTDRUGEVIDENCE):
+	$(JQ) -r 'select(.sourceID == "chembl") | [.target.id, .disease.id, .drug.id, .evidence.drug2clinic.clinical_trial_phase.numeric_index, .evidence.target2drug.action_type, .drug.molecule_name] | @tsv' $(OTEVIDENCE) | $(SED) -e 's/http:\/\/identifiers.org\/chembl.compound\///g' > $@
 
 $(COVIDCOMPLEX):
 	$(CURL)  $(COVIDCOMPLEXURL) > $@
