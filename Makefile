@@ -50,6 +50,8 @@ DATADIR= $(ROOTDIR)/temp
 
 ## Uniprot
 UNIPROTCOVIDFLATFILE=$(TEMPDIR)/uniprot_covid19.dat
+## proteins in human infecting coronavirus
+WIKIDATAPROTEINS=$(TEMPDIR)/wikidata_proteins.tsv
 ## OT
 OTTRACTABILITY=$(TEMPDIR)/ot_tractability.tsv
 OTSAFETY=$(TEMPDIR)/ot_safety.json
@@ -84,6 +86,9 @@ create-temp:
 $(UNIPROTCOVIDFLATFILE):
 	$(CURL) $(UNIPROTCOVIDFTP) > $@
 
+$(WIKIDATAPROTEINS):
+	$(CURL) -H "Accept: text/tab-separated-values" -G $(WIKIDATASERVER) --data-urlencode query@$(SRCDIR)/query/virusProteinsAll.rq > $@
+
 $(OTTRACTABILITY):
 	$(CURL) $(OTTRACTABILITYBUCKET) > $@
 
@@ -100,7 +105,7 @@ $(OTDRUGEVIDENCE):
 	$(JQ) -r 'select(.sourceID == "chembl") | [.target.id, .disease.id, .drug.id, .evidence.drug2clinic.clinical_trial_phase.numeric_index, .evidence.target2drug.action_type, .drug.molecule_name] | @tsv' $(OTEVIDENCE) | $(SED) -e 's/http:\/\/identifiers.org\/chembl.compound\///g' > $@
 
 $(WIKIDATATRIALS):
-	$(CURL) -H "Accept: text/tab-separated-values" -G $(WIKIDATASERVER) --data-urlencode query@$(SRCDIR)/query/clinicalTrials.rq > $(WIKIDATATRIALS)
+	$(CURL) -H "Accept: text/tab-separated-values" -G $(WIKIDATASERVER) --data-urlencode query@$(SRCDIR)/query/clinicalTrials.rq > $@
 
 $(COVIDCOMPLEX):
 	$(CURL)  $(COVIDCOMPLEXURL) > $@
