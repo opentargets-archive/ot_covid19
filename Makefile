@@ -22,14 +22,8 @@ COVIDCOMPLEXURL=http://ftp.ebi.ac.uk/pub/databases/IntAct/complex/current/comple
 # IntAct COVID related interaction query:
 INTACTCOVIDURL="https://www.ebi.ac.uk/intact/export?format=mitab_27&query=annot%3A%22dataset%3ACoronavirus%22&negative=false&spoke=false&ontology=false&sort=intact-miscore&asc=false" 
 
-#################################
-# Paths (DIRECTORIES)
-#################################
-
-ROOTDIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-TEMPDIR= $(ROOTDIR)/temp
-SRCDIR= $(ROOTDIR)/src
-DATADIR= $(ROOTDIR)/temp
+## Wikidata server
+WIKIDATASERVER=https://query.wikidata.org/bigdata/namespace/wdq/sparql
 
 #################################
 # Paths (Tools)
@@ -42,16 +36,30 @@ JQ ?= $(shell which jq)
 SED ?= $(shell which sed)
 
 #################################
+# Paths (DIRECTORIES)
+#################################
+
+ROOTDIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+TEMPDIR= $(ROOTDIR)/temp
+SRCDIR= $(ROOTDIR)/src
+DATADIR= $(ROOTDIR)/temp
+
+#################################
 # Relevant files
 #################################
 
+## Uniprot
 UNIPROTCOVIDFLATFILE=$(TEMPDIR)/uniprot_covid19.dat
+## OT
 OTTRACTABILITY=$(TEMPDIR)/ot_tractability.tsv
 OTSAFETY=$(TEMPDIR)/ot_safety.json
 OTBASELINE=$(TEMPDIR)/ot_baseline.txt
 OTEVIDENCE=$(TEMPDIR)/ot_evidence.json
+## Drugs
 OTDRUGEVIDENCE=$(TEMPDIR)/ot_drug_evidence.tsv
-COVIDCOMPLEX=$(TEMPDIR)/complex_sars-cov-2.tsv  
+WIKIDATATRIALS=$(TEMPDIR)/wiki_trials.tsv
+## Interactions
+COVIDCOMPLEX=$(TEMPDIR)/complex_sars-cov-2.tsv
 INTACTCOVID=$(TEMPDIR)/IntAct_SARS-COV-2_interactions.tsv
 
 #### Phony targets
@@ -64,7 +72,7 @@ all: create-temp downloads parsers
 # Downloads
 #############
 
-downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID)
+downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE)
@@ -90,6 +98,9 @@ $(OTEVIDENCE):
 
 $(OTDRUGEVIDENCE):
 	$(JQ) -r 'select(.sourceID == "chembl") | [.target.id, .disease.id, .drug.id, .evidence.drug2clinic.clinical_trial_phase.numeric_index, .evidence.target2drug.action_type, .drug.molecule_name] | @tsv' $(OTEVIDENCE) | $(SED) -e 's/http:\/\/identifiers.org\/chembl.compound\///g' > $@
+
+$(WIKIDATATRIALS):
+	$(CURL) -H "Accept: text/tab-separated-values" -G $(WIKIDATASERVER) --data-urlencode query@$(SRCDIR)/query/clinicalTrials.rq > $(WIKIDATATRIALS)
 
 $(COVIDCOMPLEX):
 	$(CURL)  $(COVIDCOMPLEXURL) > $@
