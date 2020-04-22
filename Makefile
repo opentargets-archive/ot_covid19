@@ -34,6 +34,7 @@ CURL ?= $(shell which curl)
 GUNZIP ?= $(shell which gunzip)
 JQ ?= $(shell which jq)
 SED ?= $(shell which sed)
+PIPENV ?= $(shell which pipenv)
 
 #################################
 # Paths (DIRECTORIES)
@@ -50,6 +51,7 @@ DATADIR= $(ROOTDIR)/temp
 
 ## Uniprot
 UNIPROTCOVIDFLATFILE=$(TEMPDIR)/uniprot_covid19.dat
+UNIPROTCOVIDPARSED=$(TEMPDIR)/uniprot_covid19_parsed.tsv
 ## proteins in human infecting coronavirus
 WIKIDATAPROTEINS=$(TEMPDIR)/wikidata_proteins.tsv
 ## OT
@@ -77,7 +79,7 @@ all: create-temp downloads parsers
 downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
-parsers: $(OTDRUGEVIDENCE)
+parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED)
 
 # CREATES TEMPORARY DIRECTORY
 create-temp:
@@ -85,6 +87,9 @@ create-temp:
 
 $(UNIPROTCOVIDFLATFILE):
 	$(CURL) $(UNIPROTCOVIDFTP) > $@
+
+$(UNIPROTCOVIDPARSED): $(UNIPROTCOVIDFLATFILE)
+	$(PIPENV) run python $(SRCDIR)/parsers/uniprot_parser.py -i $(UNIPROTCOVIDFLATFILE) > $@
 
 $(WIKIDATAPROTEINS):
 	$(CURL) -H "Accept: text/tab-separated-values" -G $(WIKIDATASERVER) --data-urlencode query@$(SRCDIR)/query/virusProteinsAll.rq > $@
@@ -112,5 +117,4 @@ $(COVIDCOMPLEX):
 
 $(INTACTCOVID):
 	$(CURL) $(INTACTCOVIDURL) > $@
-
 
