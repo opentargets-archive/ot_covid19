@@ -64,7 +64,10 @@ OTDRUGEVIDENCE=$(TEMPDIR)/ot_drug_evidence.tsv
 WIKIDATATRIALS=$(TEMPDIR)/wiki_trials.tsv
 ## Interactions
 COVIDCOMPLEX=$(TEMPDIR)/complex_sars-cov-2.tsv
+COVIDCOMPLEXPARSED=$(TEMPDIR)/complex_sars-cov-2_parsed.tsv
+
 INTACTCOVID=$(TEMPDIR)/IntAct_SARS-COV-2_interactions.tsv
+INTACTCOVIDPARSED=$(TEMPDIR)/IntAct_SARS-COV-2_interactions_parsed.tsv
 
 #### Phony targets
 .PHONY: all downloads create-temp parsers
@@ -79,7 +82,7 @@ all: create-temp downloads parsers
 downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
-parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED)
+parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED)
 
 # CREATES TEMPORARY DIRECTORY
 create-temp:
@@ -114,6 +117,9 @@ $(WIKIDATATRIALS):
 
 $(COVIDCOMPLEX):
 	$(CURL)  $(COVIDCOMPLEXURL) > $@
+
+$(COVIDCOMPLEXPARSED):
+	$(PIPENV) run python $(SRCDIR)/parsers/complex_parser.py -i $(COVIDCOMPLEX) -o $(COVIDCOMPLEXPARSED)
 
 $(INTACTCOVID):
 	$(CURL) $(INTACTCOVIDURL) > $@
