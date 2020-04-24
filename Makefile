@@ -88,19 +88,25 @@ INTACTCOVID=$(TEMPDIR)/IntAct_SARS-COV-2_interactions.tsv
 INTACTCOVIDPARSED=$(TEMPDIR)/IntAct_SARS-COV-2_interactions_parsed.tsv
 
 #### Phony targets
-.PHONY: all downloads create-temp parsers
+.PHONY: all setup-environment downloads create-temp parsers
 
 # ALL
-all: create-temp downloads parsers
+all: setup-environment create-temp downloads parsers
 
-#############
-# Downloads
-#############
+## Setup environment
+setup-environment:
+	$(PIPENV) install
 
+## Downlad files
 downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL)
 
+<<<<<<< HEAD
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED)
+=======
+## Parsers
+parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED)
+>>>>>>> 2af716e445e0a1cf79b260d4cdf25a8c68b80bc0
 
 # CREATES TEMPORARY DIRECTORY
 create-temp:
