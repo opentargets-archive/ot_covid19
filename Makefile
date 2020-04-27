@@ -15,7 +15,8 @@ UNIPROTIDMAPPINGURL=ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/
 # OT files
 OTTRACTABILITYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/tractability_buckets-2020-03-26.tsv
 OTSAFETYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/known_target_safety-2020-04-01.json
-OTBASELINEBUCKET=https://github.com/opentargets/expression_analysis/blob/master/exp_summary_NormCounts_genes.txt
+OTBASELINEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/exp_summary_NormCounts_genes_all_Blueprint2_v2-2020-04-01.txt
+OTBASELINETISSUEMAPGITHUB=https://raw.githubusercontent.com/opentargets/expression_hierarchy/master/process/map_with_efos.json
 OTEVIDENCEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/output/20.04_evidence_data.json.gz
 
 # Ensembl json
@@ -73,7 +74,8 @@ WIKIDATAPROTEINS=$(TEMPDIR)/wikidata_proteins.tsv
 ## OT
 OTTRACTABILITY=$(TEMPDIR)/ot_tractability.tsv
 OTSAFETY=$(TEMPDIR)/ot_safety.json
-OTBASELINE=$(TEMPDIR)/ot_baseline.txt
+OTBASELINE=$(TEMPDIR)/ot_baseline.tsv
+OTBASELINETISSUEMAP=$(TEMPDIR)/ot_map_with_efos.json
 OTEVIDENCE=$(TEMPDIR)/ot_evidence.json
 ## Drugs
 OTDRUGEVIDENCE=$(TEMPDIR)/ot_drug_evidence.tsv
@@ -102,7 +104,7 @@ setup-environment:
 	$(PIPENV) install
 
 ## Downlad files
-downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL)
+downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTBASELINETISSUEMAPGITHUB) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) $(ENSEMBLPARSED)
@@ -135,6 +137,9 @@ $(OTSAFETY):
 
 $(OTBASELINE):
 	$(CURL) $(OTBASELINEBUCKET) > $@
+
+$(OTBASELINETISSUEMAP):
+	$(CURL) $(OTBASELINETISSUEMAPGITHUB) > $@
 
 $(OTEVIDENCE):
 	$(CURL) $(OTEVIDENCEBUCKET) | $(GUNZIP) -c > $@
