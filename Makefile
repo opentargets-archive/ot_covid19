@@ -96,7 +96,7 @@ UNIPROTCOVIDPARSED=$(PARSEDDIR)/uniprot_covid19_parsed.tsv
 ## OT
 OTDRUGEVIDENCE=$(PARSEDDIR)/ot_drug_evidence.tsv
 ## Ensembl
-ENSEMBLPARSED=$(TEMPDIR)/ensembl_parsed.json.gz
+ENSEMBLPARSED=$(PARSEDDIR)/ensembl_parsed.json.gz
 ## Interactions
 COVIDCOMPLEXPARSED=$(PARSEDDIR)/complex_sars-cov-2_parsed.tsv
 INTACTCOVIDPARSED=$(PARSEDDIR)/IntAct_SARS-COV-2_interactions_parsed.tsv
