@@ -10,6 +10,8 @@
 
 # Uniprot covid19 flat file
 UNIPROTCOVIDFTP=ftp://ftp.uniprot.org/pub/databases/uniprot/pre_release/covid-19.dat
+UNIPROTIDMAPPINGURL=ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/HUMAN_9606_idmapping.dat.gz
+
 # OT files
 OTTRACTABILITYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/tractability_buckets-2020-03-26.tsv
 OTSAFETYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/known_target_safety-2020-04-01.json
@@ -62,6 +64,7 @@ DATADIR= $(ROOTDIR)/temp
 ## Uniprot
 UNIPROTCOVIDFLATFILE=$(TEMPDIR)/uniprot_covid19.dat
 UNIPROTCOVIDPARSED=$(TEMPDIR)/uniprot_covid19_parsed.tsv
+UNIPROTIDMAPPING=$(TEMPDIR)/uniprot_human_idmapping.dat
 ## Ensembl
 ENSEMBL=$(TEMPDIR)/ensembl.json
 ## proteins in human infecting coronavirus
@@ -98,7 +101,7 @@ setup-environment:
 	$(PIPENV) install
 
 ## Downlad files
-downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL)
+downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED)
@@ -106,6 +109,9 @@ parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTC
 # CREATES TEMPORARY DIRECTORY
 create-temp:
 	mkdir -p $(TEMPDIR)
+
+$(UNIPROTIDMAPPING):
+	$(CURL) $(UNIPROTIDMAPPINGURL) | $(GUNZIP) -c > $@
 
 $(UNIPROTCOVIDFLATFILE):
 	$(CURL) $(UNIPROTCOVIDFTP) > $@
