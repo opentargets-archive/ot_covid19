@@ -52,32 +52,7 @@ def get_MIM_morbidity(xrefs):
 
 
 def main():
-
-
-    filename = '/Users/dsuveges/repositories/ot_covid19/temp/ensembl_1000.json'
-    #filename = '/Users/dsuveges/repositories/ot_covid19/temp/test_ENSG00000101204.json'
-
-    parsed_data = []
-
-    output_file_handle = gzip.open('/Users/dsuveges/repositories/ot_covid19/temp/output.json.gz', 'wt')
-
-    # OPen and looping through all ensembl genes:
-    with open(filename, 'r') as i:
-        for line in i:        
-            # Read data:
-            try:
-                data = json.loads(line.strip())
-                
-                # Parse fields:
-                parsed_data = parsing_ensembl_json(data)
-                
-                # Save parsed field:
-                output_file_handle.write(json.dumps(parsed_data)+'\n')
-                
-            except JSONDecodeError as e:
-                raise(e)
-                
-    output_file_handle.close()
+    
     # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser = argparse.ArgumentParser(description='Parse information from Ensembl json export and saves as gzipped json.')
