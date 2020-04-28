@@ -9,7 +9,7 @@
 #################################
 
 # Uniprot covid19 flat file
-UNIPROTCOVIDFTP=ftp://ftp.uniprot.org/pub/databases/uniprot/pre_release/covid-19.dat
+UNIPROTCOVIDQUERY="https://www.ebi.ac.uk/uniprot/api/covid-19/uniprotkb/download?format=json&query=%2A"
 UNIPROTIDMAPPINGURL=ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/HUMAN_9606_idmapping.dat.gz
 
 # OT files
@@ -62,7 +62,7 @@ DATADIR= $(ROOTDIR)/temp
 #################################
 
 ## Uniprot
-UNIPROTCOVIDFLATFILE=$(TEMPDIR)/uniprot_covid19.dat
+UNIPROTCOVIDFLATFILE=$(TEMPDIR)/uniprot_covid19.json
 UNIPROTCOVIDPARSED=$(TEMPDIR)/uniprot_covid19_parsed.tsv
 UNIPROTIDMAPPING=$(TEMPDIR)/uniprot_human_idmapping.dat
 ## Ensembl
@@ -116,7 +116,7 @@ create-temp:
 ##
 
 $(UNIPROTIDMAPPING):
-	$(CURL) $(UNIPROTIDMAPPINGURL) | $(GUNZIP) -c > $@
+	$(CURL) $(UNIPROTCOVIDQUERY) > $@
 
 $(UNIPROTCOVIDFLATFILE):
 	$(CURL) $(UNIPROTCOVIDFTP) > $@
