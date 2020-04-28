@@ -6,8 +6,8 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-biopython = {editable = true,git = "https://github.com/biopython/biopython.git"}
 pandas = "*"
+requests = "*"
 
 [requires]
 python_version = "3.7"

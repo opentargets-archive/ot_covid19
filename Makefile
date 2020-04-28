@@ -9,7 +9,7 @@
 #################################
 
 # Uniprot covid19 flat file
-UNIPROTCOVIDFTP=ftp://ftp.uniprot.org/pub/databases/uniprot/pre_release/covid-19.dat
+UNIPROTCOVIDQUERY="https://www.ebi.ac.uk/uniprot/api/covid-19/uniprotkb/download?format=json&query=%2A"
 UNIPROTIDMAPPINGURL=ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/HUMAN_9606_idmapping.dat.gz
 
 # OT files
@@ -65,7 +65,7 @@ PREFORMATEDDIR ?= $(TEMPDIR)/preformated_tables
 #################################
 
 ## Uniprot
-UNIPROTCOVIDFLATFILE=$(RAWDIR)/uniprot_covid19.dat
+UNIPROTCOVIDFLATFILE=$(RAWDIR)/uniprot_covid19.json
 UNIPROTIDMAPPING=$(RAWDIR)/uniprot_human_idmapping.dat
 ## Ensembl
 ENSEMBL=$(RAWDIR)/ensembl.json
@@ -143,7 +143,7 @@ $(UNIPROTIDMAPPING):
 	$(CURL) $(UNIPROTIDMAPPINGURL) | $(GUNZIP) -c > $@
 
 $(UNIPROTCOVIDFLATFILE):
-	$(CURL) $(UNIPROTCOVIDFTP) > $@
+	$(CURL) $(UNIPROTCOVIDQUERY) > $@
 
 $(ENSEMBL):
 	$(CURL) $(ENSEMBLURL) | $(JQ) -r '.genes[] | @json' > $(ENSEMBL)
@@ -193,7 +193,7 @@ $(INTACTCOVID):
 ##
 
 $(UNIPROTCOVIDPARSED): $(UNIPROTCOVIDFLATFILE)
-	$(PIPENV) run python $(SRCDIR)/parsers/uniprot_parser.py -i $(UNIPROTCOVIDFLATFILE) > $@
+	$(PIPENV) run python $(SRCDIR)/parsers/uniprot_parser.py -i $(UNIPROTCOVIDFLATFILE) -o $@
 
 $(OTDRUGEVIDENCE):
 	$(JQ) -r 'select(.sourceID == "chembl") | [.target.id, .disease.id, .drug.id, .evidence.drug2clinic.clinical_trial_phase.numeric_index, .evidence.target2drug.action_type, .drug.molecule_name] | @tsv' $(OTEVIDENCE) | $(SED) -e 's/http:\/\/identifiers.org\/chembl.compound\///g' > $@
@@ -206,3 +206,4 @@ $(ENSEMBLPARSED):
 
 $(INTACTCOVIDPARSED):
 	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $(INTACTCOVIDPARSED)
+
