@@ -53,49 +53,70 @@ PIPENV ?= $(shell which pipenv)
 #################################
 
 ROOTDIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-TEMPDIR= $(ROOTDIR)/temp
 SRCDIR= $(ROOTDIR)/src
-DATADIR= $(ROOTDIR)/temp
+DATADIR= $(ROOTDIR)/data
+TEMPDIR= $(ROOTDIR)/temp
+RAWDIR ?= $(TEMPDIR)/raw_files
+PARSEDDIR ?= $(TEMPDIR)/parsed_tables
+PREFORMATEDDIR ?= $(TEMPDIR)/preformated_tables
 
 #################################
-# Relevant files
+# RAW FILES
 #################################
 
 ## Uniprot
-UNIPROTCOVIDFLATFILE=$(TEMPDIR)/uniprot_covid19.dat
-UNIPROTCOVIDPARSED=$(TEMPDIR)/uniprot_covid19_parsed.tsv
-UNIPROTIDMAPPING=$(TEMPDIR)/uniprot_human_idmapping.dat
+UNIPROTCOVIDFLATFILE=$(RAWDIR)/uniprot_covid19.dat
+UNIPROTIDMAPPING=$(RAWDIR)/uniprot_human_idmapping.dat
 ## Ensembl
-ENSEMBL=$(TEMPDIR)/ensembl.json
-ENSEMBLPARSED=$(TEMPDIR)/ensembl_parsed.json.gz
+ENSEMBL=$(RAWDIR)/ensembl.json
 ## proteins in human infecting coronavirus
-WIKIDATAPROTEINS=$(TEMPDIR)/wikidata_proteins.tsv
+WIKIDATAPROTEINS=$(RAWDIR)/wikidata_proteins.tsv
 ## OT
-OTTRACTABILITY=$(TEMPDIR)/ot_tractability.tsv
-OTSAFETY=$(TEMPDIR)/ot_safety.json
-OTBASELINE=$(TEMPDIR)/ot_baseline.txt
-OTEVIDENCE=$(TEMPDIR)/ot_evidence.json
+OTTRACTABILITY=$(RAWDIR)/ot_tractability.tsv
+OTSAFETY=$(RAWDIR)/ot_safety.json
+OTBASELINE=$(RAWDIR)/ot_baseline.txt
+OTEVIDENCE=$(RAWDIR)/ot_evidence.json
 ## Drugs
-OTDRUGEVIDENCE=$(TEMPDIR)/ot_drug_evidence.tsv
-WIKIDATATRIALS=$(TEMPDIR)/wiki_trials.tsv
-CHEMBLMOLECULE=$(TEMPDIR)/chembl_molecules.json
-CHEMBLDRUGINDICATION=$(TEMPDIR)/chembl_indication.json
-CHEMBLTARGETS=$(TEMPDIR)/chembl_targets.json
-CHEMBLTARGETCOMPONENTS=$(TEMPDIR)/chembl_target_components.json
-CHEMBLMOA=$(TEMPDIR)/chembl_mechanisms.json
-
+WIKIDATATRIALS=$(RAWDIR)/wiki_trials.tsv
+CHEMBLMOLECULE=$(RAWDIR)/chembl_molecules.json
+CHEMBLDRUGINDICATION=$(RAWDIR)/chembl_indication.json
+CHEMBLTARGETS=$(RAWDIR)/chembl_targets.json
+CHEMBLTARGETCOMPONENTS=$(RAWDIR)/chembl_target_components.json
+CHEMBLMOA=$(RAWDIR)/chembl_mechanisms.json
 ## Interactions
-COVIDCOMPLEX=$(TEMPDIR)/complex_sars-cov-2.tsv
-COVIDCOMPLEXPARSED=$(TEMPDIR)/complex_sars-cov-2_parsed.tsv
+COVIDCOMPLEX=$(RAWDIR)/complex_sars-cov-2.tsv
+INTACTCOVID=$(RAWDIR)/IntAct_SARS-COV-2_interactions.tsv
 
-INTACTCOVID=$(TEMPDIR)/IntAct_SARS-COV-2_interactions.tsv
-INTACTCOVIDPARSED=$(TEMPDIR)/IntAct_SARS-COV-2_interactions_parsed.tsv
+######################################################
+# PARSED FILES - Files with some intermediate parsing
+######################################################
+
+## Uniprot
+UNIPROTCOVIDPARSED=$(PARSEDDIR)/uniprot_covid19_parsed.tsv
+## OT
+OTDRUGEVIDENCE=$(PARSEDDIR)/ot_drug_evidence.tsv
+## Ensembl
+ENSEMBLPARSED=$(PARSEDDIR)/ensembl_parsed.json.gz
+## Interactions
+COVIDCOMPLEXPARSED=$(PARSEDDIR)/complex_sars-cov-2_parsed.tsv
+INTACTCOVIDPARSED=$(PARSEDDIR)/IntAct_SARS-COV-2_interactions_parsed.tsv
+
+###############################################################
+# PREFORMATED FILES - Files already formatted to be integrated
+###############################################################
+
+#TODO
+
+#############################################################################
 
 #### Phony targets
-.PHONY: all setup-environment downloads create-temp parsers
+.PHONY: all setup-environment clean-all downloads create-temp parsers
 
 # ALL
 all: setup-environment create-temp downloads parsers
+
+clean-all:
+	rm -rf $(TEMPDIR)
 
 ## Setup environment
 setup-environment:
@@ -110,6 +131,9 @@ parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTC
 # CREATES TEMPORARY DIRECTORY
 create-temp:
 	mkdir -p $(TEMPDIR)
+	mkdir -p $(RAWDIR)
+	mkdir -p $(PARSEDDIR)
+	mkdir -p $(PREFORMATEDDIR)
 
 ##
 ## Fetching data:
