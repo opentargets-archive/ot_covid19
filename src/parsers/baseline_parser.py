@@ -1,6 +1,14 @@
 import json
 import argparse
 
+def get_tissue_mappings(mapping_filename):
+    """Return a dictionary that maps tissue names to anatomical systems and organs"""
+
+    with open(mapping_filename, 'r') as mappings_file:
+        mapping_dict = json.load(mappings_file)
+        return mapping_dict['tissues']
+
+
 def main():
 
     # Parse CLI parameters
@@ -25,6 +33,9 @@ def main():
     input_file = args.input
     mapping_file = args.mapping
     output_file = args.output
+
+    # Load tissue mappings
+    tissue_mappings = get_tissue_mappings(mapping_file)
 
 
 if __name__ == '__main__':
