@@ -105,15 +105,15 @@ INTACTCOVIDPARSED=$(PARSEDDIR)/IntAct_SARS-COV-2_interactions_parsed.tsv
 # PREFORMATED FILES - Files already formatted to be integrated
 ###############################################################
 
-#TODO
+INTEGRATED=$(TEMPDIR)/integrated_data.tsv
 
 #############################################################################
 
 #### Phony targets
-.PHONY: all setup-environment clean-all downloads create-temp parsers
+.PHONY: all setup-environment clean-all downloads create-temp parsers integrate
 
 # ALL
-all: setup-environment create-temp downloads parsers
+all: setup-environment create-temp downloads parsers integrate
 
 clean-all:
 	rm -rf $(TEMPDIR)
@@ -134,6 +134,9 @@ create-temp:
 	mkdir -p $(RAWDIR)
 	mkdir -p $(PARSEDDIR)
 	mkdir -p $(PREFORMATEDDIR)
+
+## Run integrator:
+integrate: $(INTEGRATED)
 
 ##
 ## Fetching data:
@@ -207,3 +210,9 @@ $(ENSEMBLPARSED):
 $(INTACTCOVIDPARSED):
 	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $(INTACTCOVIDPARSED)
 
+##
+## Integrate:
+##
+
+$(INTEGRATED):
+		$(PIPENV) run python $(SRCDIR)/covid_data_integration.py -i $(PARSEDDIR) -o $(INTEGRATED)
