@@ -23,8 +23,8 @@ def initialise_expression_dict(mapping_dictionary):
     # Initialise scoring dictionary
     expression_dict={}
     for anatomical_system in anatomical_systems:
-        expression_dict[anatomical_system]="No"
-        expression_dict[anatomical_system + " list"]=[]
+        expression_dict[anatomical_system + " (y/n)"]="No"
+        expression_dict[anatomical_system + " (list)"]=[]
 
     return expression_dict
 
@@ -53,9 +53,27 @@ def parse_baseline(baseline_filename, tissue_mapping, output_filename):
             # Gene is considered expressed if > 6 tpm
             if expression[tissue] > 6:
                 for anat_sys in tissue_mapping[tissue]['anatomical_systems']:
-                    expression_per_anatomical_systems_dict[gene][anat_sys] = "Yes"
-                    expression_per_anatomical_systems_dict[gene][anat_sys + " list"].append(tissue)
+                    expression_per_anatomical_systems_dict[gene][anat_sys + " (y/n)"] = "Yes"
+                    expression_per_anatomical_systems_dict[gene][anat_sys + " (list)"].append(tissue)
     expression_per_anatomical_systems_df = pd.DataFrame.from_dict(expression_per_anatomical_systems_dict, orient='index', columns=empty_expression_dict.keys())
+    expression_per_anatomical_systems_df.index.name = "ID"
+
+    # Drop anatomical systems where no gene is expressed - happens for sensory system
+    # Find columns with single unique value - only yes/no columns can be used as lists are not hashable
+    columns_count_unique = expression_per_anatomical_systems_df.filter(regex="(y/n)").nunique()
+    columns_single_unique_value = columns_count_unique[columns_count_unique==1].index
+
+    # Check that the unique values are either "No" or empty list
+    empty_columns = []
+    for column in columns_single_unique_value:
+        unique_value = expression_per_anatomical_systems_df[column].unique()[0]
+        if unique_value == "No":
+            # Add both yes/no column and list column to list to be removed
+            empty_columns.append(column)
+            empty_columns.append(column.replace("y/n", "list"))
+    expression_per_anatomical_systems_df.drop(columns=empty_columns, inplace=True)
+
+    # Write to file
     expression_per_anatomical_systems_df.to_csv(output_filename, sep='\t')
 
 def main():
