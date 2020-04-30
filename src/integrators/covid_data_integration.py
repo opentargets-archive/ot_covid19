@@ -33,13 +33,78 @@ class DataIntegrator(object):
         ensembl_df.uniprot_ids = ensembl_df.uniprot_ids.apply(lambda x: ','.join(x) if len(x) > 0 else None)
         
         self.ensembl_df = ensembl_df
-
-
-    def add_data(self, data, columns=[], flag=False):
+        
+        
+    def add_data(self, data_df, parameters):
         """
-        Adding a new set of data. 
+        Adding new data to the integrator
         """
+        ##
+        ## Checking merge parameters
+        ##
+        
+        # Checking columns of intereset:
+        columns = parameters['columns'] if 'columns' in parameters else []
+        
+        # Check flag:
+        flag = parameters['flag'] if 'flag' in parameters else False
+        
+        # Flag label must be set if flag is true:
+        if flag:  
+            try:
+                flag_label = parameters['flag_label']
+                columns.append(flag_label)
+            except ValueError as e:
+                raise e('If adding flag is required, the column name has to be set (flag_label key)!')
+                
+        # How to join:
+        how = parameters['how'] if 'how' in parameters else 'left'
+        
+        # Is there any columns to map to existing columns?
+        columns_to_map = parameters['columns_to_map'] if 'columns_to_map' in parameters else {}  
+        
+        ##
+        ## Updating data
+        ##
+        
+        # Adding flag to the dataframe:
+        if flag:
+            data_df[flag_label] = True
 
+        # Renaming columns to avoid confusion:
+        protected_columns = columns.append('id')
+        column_rename_map = {x : x+'_temp' for x in data_df.columns if x not in columns}
+        data_df.rename(columns=column_rename_map, inplace=True)
+
+        ##
+        ## Join data:
+        ##
+        
+        merged = self.ensembl_df.merge(data_df, how=how, on='id')
+        self.merged = merged
+        ##
+        ## Cleaning merged data:
+        ##
+        
+        # Removing temporary columns:
+        merged.drop(list(column_rename_map.values()), axis=1, inplace=True)
+        
+        # Adding false values to flag column:
+        if flag:
+            merged[flag_label].loc[merged[flag_label]!=True] = False
+            
+        # Update dataframe:
+        self.ensembl_df = merged
+        
+    def get_integrated_data(self):
+        return self.ensembl_df
+    
+    
+    def save_integrated(self, file_name='test.tsv'):
+        if '.tsv' in file_name:
+            self.ensembl_df.to_csv(file_name, sep='\t', index=False)
+        if '.xlsx' in file_name:
+            self.ensembl_df.to_excel(file_name, index=False)
 
 
 
@@ -73,7 +138,8 @@ def main():
 
     # Integrating all parsed datasets:
     for source_file, parameters in config_data.items():
-        integrator.add_data('{}/{}'.format(input_folder, source_file), parameters=parameters)
+        data_df = pd.read_csv('{}/{}'.format(input_folder, source_file), sep='\t')
+        integrator.add_data(data_df, parameters=parameters)
 
 
 if __name__ == '__main__':

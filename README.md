@@ -6,6 +6,9 @@ Centralise publicly available datasets in order to build a Virus – Host Target
 A full description of the project vision is [here](https://drive.google.com/open?id=1NzbSrh_Cqs9yCIyl-J7HjCHfNFtkVNdQ)
 Some of the questions the project is trying to answer [here](https://docs.google.com/document/d/1Tcc0lhu5YqT3-fY5N4EzPjYtd-dcKhM5y-Lu1TqGD30/edit#heading=h.clav1w5t1yv0)
 
+## Contributors
+This project is open to contributors.
+
 ## Data flow
 
 1. Potential data sources are fetched based on URLs provided in the `Makefile` if such URL is not available, the data tables can be directly added to the `/data` folder.
@@ -15,7 +18,7 @@ Some of the questions the project is trying to answer [here](https://docs.google
 
 ## Usage
 
-#### Run project from scratch:
+#### Run project from scratch
 
 ```bash
 git clone https://github.com/opentargets/ot_covid19
@@ -58,7 +61,7 @@ For the integration part the concept is that we want to keep out logic altogethe
 2. Tables must have a column called `id` containing unique identifiers (eg. Ensembl gene id or Uniprot primary accession)
 3. Tables to be integrated must be added to the integration config files describing how the integration should happen
 
-#### Integration configuration:
+#### Integration configuration
 
 This recipe shows how to integrate a dataset were we are expecting new targets (eg viral proteins) that are not included in the complete human gene set:
 
