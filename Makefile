@@ -15,7 +15,8 @@ UNIPROTIDMAPPINGURL=ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/
 # OT files
 OTTRACTABILITYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/tractability_buckets-2020-03-26.tsv
 OTSAFETYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/known_target_safety-2020-04-01.json
-OTBASELINEBUCKET=https://github.com/opentargets/expression_analysis/blob/master/exp_summary_NormCounts_genes.txt
+OTBASELINEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/exp_summary_NormCounts_genes_all_Blueprint2_v2-2020-04-01.txt
+OTBASELINETISSUEMAPGITHUB=https://raw.githubusercontent.com/opentargets/expression_hierarchy/master/process/map_with_efos.json
 OTEVIDENCEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/output/20.04_evidence_data.json.gz
 
 # Ensembl json
@@ -79,6 +80,7 @@ WIKIDATAPROTEINS=$(RAWDIR)/wikidata_proteins.tsv
 OTTRACTABILITY=$(RAWDIR)/ot_tractability.tsv
 OTSAFETY=$(RAWDIR)/ot_safety.json
 OTBASELINE=$(RAWDIR)/ot_baseline.txt
+OTBASELINETISSUEMAP=$(RAWDIR)/ot_map_with_efos.json
 OTEVIDENCE=$(RAWDIR)/ot_evidence.json
 ## Drugs
 WIKIDATATRIALS=$(RAWDIR)/wiki_trials.tsv
@@ -101,6 +103,7 @@ HPA=$(RAWDIR)/hpa.json
 UNIPROTCOVIDPARSED=$(PREFORMATEDDIR)/uniprot_covid19_parsed.tsv
 ## OT
 OTDRUGEVIDENCE=$(PARSEDDIR)/ot_drug_evidence.tsv
+OTBASELINEPARSED=$(PARSEDDIR)/ot_baseline_expression_per_anatomical_system.tsv
 ## Ensembl
 ENSEMBLPARSED=$(PARSEDDIR)/ensembl_parsed.json.gz
 ## Interactions
@@ -129,10 +132,10 @@ setup-environment:
 	$(PIPENV) install
 
 ## Downlad files
-downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL) $(HPA)
+downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTBASELINETISSUEMAP) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL) $(HPA)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
-parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) $(ENSEMBLPARSED)
+parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) $(ENSEMBLPARSED) $(OTBASELINEPARSED)
 
 # CREATES TEMPORARY DIRECTORY
 create-temp:
@@ -169,6 +172,9 @@ $(OTSAFETY):
 
 $(OTBASELINE):
 	$(CURL) $(OTBASELINEBUCKET) > $@
+
+$(OTBASELINETISSUEMAP):
+	$(CURL) $(OTBASELINETISSUEMAPGITHUB) > $@
 
 $(OTEVIDENCE):
 	$(CURL) $(OTEVIDENCEBUCKET) | $(GUNZIP) -c > $@
@@ -219,6 +225,9 @@ $(ENSEMBLPARSED): $(COVIDCOMPLEX)
 $(INTACTCOVIDPARSED): $(INTACTCOVID)
 	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $(INTACTCOVIDPARSED)
 
+$(OTBASELINEPARSED):
+	$(PIPENV) run python $(SRCDIR)/parsers/baseline_parser.py -i $(OTBASELINE) -m $(OTBASELINETISSUEMAP) -o $(OTBASELINEPARSED)
+
 ##
 ## Integrate:
 ##
@@ -229,5 +238,3 @@ $(INTEGRATED):
 			-o $(INTEGRATED) \
 			-i $(PREFORMATEDDIR) \
 			-c $(SRCDIR)/integrators/integration_config.json
-
-
