@@ -2,12 +2,33 @@ import pandas as pd
 import argparse
 import gzip
 import json
+import requests
 
 # 
 
 """
 This script integrates all COVID-19 related datasets into a single table
 """
+
+def fetch_organism(tax_ids=[]):
+    base_url = 'https://www.ebi.ac.uk/ena/data/taxonomy/v1/taxon/tax-id/'
+    return_data = []
+
+    for tax_id in tax_ids:
+        try:
+            return_data.append(requests.get(base_url+str(tax_id)).json())
+        except Exception as e:
+            print(e)
+            print('[Error] Failed to fetch organism data.')
+
+    # Get all unique species:
+    try:
+        df = pd.DataFrame(return_data)
+        df.taxId = df.taxId.astype(float)
+        return df
+    except:
+        return None
+
 
 class DataIntegrator(object):
 
@@ -85,6 +106,10 @@ class DataIntegrator(object):
         ##
         ## Cleaning merged data:
         ##
+
+        # Mapping values from the new data:
+        for col1, col2 in columns_to_map.items():
+            merged[col1] = merged[col1].fillna(merged[col2+"_temp"])
         
         # Removing temporary columns:
         merged.drop(list(column_rename_map.values()), axis=1, inplace=True)
@@ -96,6 +121,7 @@ class DataIntegrator(object):
         # Update dataframe:
         self.ensembl_df = merged
         
+    
     def get_integrated_data(self):
         return self.ensembl_df
     
@@ -107,6 +133,23 @@ class DataIntegrator(object):
             self.ensembl_df.to_excel(file_name, index=False)
 
 
+    def map_taxonomy(self):
+
+        # Get a unique set of taxonomy identifiers:
+        tax_ids = [int(x) for x in self.ensembl_df.taxon_id.unique() if x == x ]
+
+        if len(tax_ids) == 0:
+            return
+
+        # Map IDs to taxonomy object:
+        tax_df= fetch_organism(tax_ids)
+
+        # Merging data wih taxonomy df:
+        merged = self.ensembl_df.merge(tax_df[['scientificName','taxId']], left_on='taxon_id', right_on='taxId', how='left')
+        merged.drop(['taxon_id','taxId'], axis=1, inplace=True)
+
+        # Update:
+        self.ensembl_df = merged
 
 
 def main():
@@ -130,7 +173,7 @@ def main():
     ## TODO: add tests here.
 
     # 1. Generate first table.
-    covid_core_data = integrator(ensemblFile)
+    integrator_obj = DataIntegrator(ensembl_file)
 
     # 2. Reading configuration:
     with open(config_file, 'rt') as f:
@@ -139,7 +182,13 @@ def main():
     # Integrating all parsed datasets:
     for source_file, parameters in config_data.items():
         data_df = pd.read_csv('{}/{}'.format(input_folder, source_file), sep='\t')
-        integrator.add_data(data_df, parameters=parameters)
+        integrator_obj.add_data(data_df, parameters)
+
+    # Map taxonomy to species:
+    integrator_obj.map_taxonomy()
+
+    # Save data:
+    integrator_obj.save_integrated(output_file)
 
 
 if __name__ == '__main__':

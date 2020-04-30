@@ -6,7 +6,7 @@
         "how": "outer", 
         "columns_to_map": {
             "taxon_id": "taxon_id",
-            "uniprot_ids": "uniprot_accessions"
+            "uniprot_ids": "primary_accession"
         }
     }
 }

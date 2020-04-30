@@ -59,6 +59,7 @@ TEMPDIR= $(ROOTDIR)/temp
 RAWDIR ?= $(TEMPDIR)/raw_files
 PARSEDDIR ?= $(TEMPDIR)/parsed_tables
 PREFORMATEDDIR ?= $(TEMPDIR)/preformated_tables
+RESULTDIR ?= $(TEMPDIR)/results
 
 #################################
 # RAW FILES
@@ -92,7 +93,7 @@ INTACTCOVID=$(RAWDIR)/IntAct_SARS-COV-2_interactions.tsv
 ######################################################
 
 ## Uniprot
-UNIPROTCOVIDPARSED=$(PARSEDDIR)/uniprot_covid19_parsed.tsv
+UNIPROTCOVIDPARSED=$(PREFORMATEDDIR)/uniprot_covid19_parsed.tsv
 ## OT
 OTDRUGEVIDENCE=$(PARSEDDIR)/ot_drug_evidence.tsv
 ## Ensembl
@@ -105,7 +106,7 @@ INTACTCOVIDPARSED=$(PARSEDDIR)/IntAct_SARS-COV-2_interactions_parsed.tsv
 # PREFORMATED FILES - Files already formatted to be integrated
 ###############################################################
 
-INTEGRATED=$(TEMPDIR)/integrated_data.tsv
+INTEGRATED=$(RESULTDIR)/integrated_data.tsv
 
 #############################################################################
 
@@ -134,6 +135,7 @@ create-temp:
 	mkdir -p $(RAWDIR)
 	mkdir -p $(PARSEDDIR)
 	mkdir -p $(PREFORMATEDDIR)
+	mkdir -p $(RESULTDIR)
 
 ## Run integrator:
 integrate: $(INTEGRATED)
@@ -215,4 +217,10 @@ $(INTACTCOVIDPARSED):
 ##
 
 $(INTEGRATED):
-		$(PIPENV) run python $(SRCDIR)/covid_data_integration.py -i $(PREFORMATEDDIR) -o $(INTEGRATED)
+		$(PIPENV) run python $(SRCDIR)/integrators/covid_data_integration.py \
+			-r $(ENSEMBLPARSED) \
+			-o $(INTEGRATED) \
+			-i $(PREFORMATEDDIR) \
+			-c $(SRCDIR)/integrators/integration_config.json
+
+
