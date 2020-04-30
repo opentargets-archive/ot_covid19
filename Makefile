@@ -215,4 +215,4 @@ $(INTACTCOVIDPARSED):
 ##
 
 $(INTEGRATED):
-		$(PIPENV) run python $(SRCDIR)/covid_data_integration.py -i $(PARSEDDIR) -o $(INTEGRATED)
+		$(PIPENV) run python $(SRCDIR)/covid_data_integration.py -i $(PREFORMATEDDIR) -o $(INTEGRATED)

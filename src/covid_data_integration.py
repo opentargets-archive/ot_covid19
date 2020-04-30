@@ -68,12 +68,18 @@ def main():
         'uniprot_covid19_parsed.tsv': {
             'columns': [], # columns to add.
             'flag': True, # Generate just a flag (indicating if a given gene/protein) is in the integrated dataset
-            'label': 'COVID-19 UniprotKB' # Label of the flag column.
+            'label': 'COVID-19 UniprotKB', # Label of the flag column.
+            'how': 'outer', # How to merge the tables
+            'columns_to_map': {
+                'taxon_id': 'taxon_id',
+                'uniprot_ids': 'uniprot_accessions'
+            }
         }
     }
 
+    # Integrating all parsed datasets:
     for source_file, parameters in input_to_parse.items():
-        integrator.add_data(source_file, columns=parameters['columns'], flag=parameters['flag'])
+        integrator.add_data(source_file, parameters=parameters)
 
 
 
