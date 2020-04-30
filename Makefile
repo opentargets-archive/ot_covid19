@@ -27,6 +27,9 @@ COVIDCOMPLEXURL=http://ftp.ebi.ac.uk/pub/databases/IntAct/complex/current/comple
 # IntAct COVID related interaction query:
 INTACTCOVIDURL="https://www.ebi.ac.uk/intact/export?format=mitab_27&query=annot%3A%22dataset%3ACoronavirus%22&negative=false&spoke=false&ontology=false&sort=intact-miscore&asc=false"
 
+# HPA
+HPAURL=https://www.proteinatlas.org/download/proteinatlas.json.gz
+
 # Drug ChEMBL
 CHEMBLMOLECULEURL=https://www.ebi.ac.uk/chembl/api/data/molecule.json
 CHEMBLDRUGINDICATIONURL=https://www.ebi.ac.uk/chembl/api/data/drug_indication.json
@@ -87,6 +90,8 @@ CHEMBLMOA=$(RAWDIR)/chembl_mechanisms.json
 ## Interactions
 COVIDCOMPLEX=$(RAWDIR)/complex_sars-cov-2.tsv
 INTACTCOVID=$(RAWDIR)/IntAct_SARS-COV-2_interactions.tsv
+## Baseline/Protein Expression
+HPA=$(RAWDIR)/hpa.json
 
 ######################################################
 # PARSED FILES - Files with some intermediate parsing
@@ -124,7 +129,7 @@ setup-environment:
 	$(PIPENV) install
 
 ## Downlad files
-downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL)
+downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL) $(HPA)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) $(ENSEMBLPARSED)
@@ -192,6 +197,8 @@ $(COVIDCOMPLEX):
 $(INTACTCOVID):
 	$(CURL) $(INTACTCOVIDURL) > $@
 
+$(HPA):
+	$(CURL) $(HPAURL) | $(GUNZIP) -c | $(JQ) -r '.[] | @json' > $@
 
 ##
 ## Running parser:
