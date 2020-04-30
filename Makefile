@@ -203,13 +203,13 @@ $(UNIPROTCOVIDPARSED): $(UNIPROTCOVIDFLATFILE)
 $(OTDRUGEVIDENCE):
 	$(JQ) -r 'select(.sourceID == "chembl") | [.target.id, .disease.id, .drug.id, .evidence.drug2clinic.clinical_trial_phase.numeric_index, .evidence.target2drug.action_type, .drug.molecule_name] | @tsv' $(OTEVIDENCE) | $(SED) -e 's/http:\/\/identifiers.org\/chembl.compound\///g' > $@
 
-$(COVIDCOMPLEXPARSED):
+$(COVIDCOMPLEXPARSED): $(COVIDCOMPLEX)
 	$(PIPENV) run python $(SRCDIR)/parsers/complex_parser.py -i $(COVIDCOMPLEX) -o $(COVIDCOMPLEXPARSED)
 
-$(ENSEMBLPARSED):
+$(ENSEMBLPARSED): $(COVIDCOMPLEX)
 	$(PIPENV) run python $(SRCDIR)/parsers/ensembl_parser.py -i $(ENSEMBL) -o $(ENSEMBLPARSED)
 
-$(INTACTCOVIDPARSED):
+$(INTACTCOVIDPARSED): $(INTACTCOVID)
 	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $(INTACTCOVIDPARSED)
 
 ##
