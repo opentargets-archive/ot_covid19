@@ -1,0 +1,12 @@
+{
+    "uniprot_covid19_parsed.tsv": {
+        "columns": [], 
+        "flag": true, 
+        "flag_label": "COVID-19 UniprotKB", 
+        "how": "outer", 
+        "columns_to_map": {
+            "taxon_id": "taxon_id",
+            "uniprot_ids": "primary_accession"
+        }
+    }
+}

@@ -8,7 +8,7 @@ import pandas as pd
 
 def map_primary_uniprot_accession_to_ensembl(row):
     organism = row['organism_scientific_name'].replace(' ','_').lower()
-    accession = row['primaryAccession']
+    accession = row['primary_accession']
     URL = 'http://rest.ensembl.org/xrefs/symbol/{}/{}?content-type=application/json&object_type=gene'.format(
         organism,accession)
 
@@ -48,15 +48,15 @@ def main():
 
         # Pick simle pieces:
         parsed_entry = {
-            'primaryAccession': entry['primaryAccession'],
+            'primary_accession': entry['primaryAccession'],
             'uniprot_name': entry['uniProtkbId'],
             'organism_name': entry['organism']['commonName'],
-            'organism_id': entry['organism']['taxonId'],
+            'taxon_id': entry['organism']['taxonId'],
             'organism_scientific_name': entry['organism']['scientificName']
         }
         
         # Seconday accessions might not provided:
-        parsed_entry['secondaryAccessions'] = ','.join(entry['secondaryAccessions']) if 'secondaryAccessions' in entry else None
+        parsed_entry['secondary_accessions'] = ','.join(entry['secondaryAccessions']) if 'secondaryAccessions' in entry else None
         
         # Adding parsed data:
         parsed_entries.append(parsed_entry)
@@ -66,7 +66,11 @@ def main():
 
     # Mapping primary uniprot accessions to Ensembl gene id:
     print('[Info] Mapping primary Uniprot identifiers to Ensembl gene id...')
-    parsed_entries_df['gene_id'] = parsed_entries_df.apply(map_primary_uniprot_accession_to_ensembl, axis=1)
+    parsed_entries_df['ensembl_id'] = parsed_entries_df.apply(map_primary_uniprot_accession_to_ensembl, axis=1)
+
+    # Assing ID: if gene id available use that, if not use primary accession:
+    parsed_entries_df['id'] = parsed_entries_df.apply(lambda row: row['ensembl_id'] if row['ensembl_id'] else row['primary_accession'], axis=1)
+
 
     # Save file:
     parsed_entries_df.to_csv(outputFile, sep='\t', index=False)
