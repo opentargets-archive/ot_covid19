@@ -49,38 +49,31 @@ def main():
     parser = argparse.ArgumentParser()
     parser = argparse.ArgumentParser(description='This script integrates COVID-19 related datasets into a single table.')
 
-    # parser.add_argument('-i', '--input', help='Folder with the input file.', required=True, type=str)
-    parser.add_argument('-e', '--ensemblFile', help='The Ensembl input file.', required=True, type=str)
-    # parser.add_argument('-o', '--output', help='Output file name.', required=True, type=str)
+    parser.add_argument('-r', '--reference', help='File with the reference dataset.', required=True, type=str)
+    parser.add_argument('-c', '--config', help='Configuration file describing integration recipes.', required=True, type=str)
+    parser.add_argument('-i', '--inputFolder', help='Folder from which the integrated files are read.', required=True, type=str)
+    parser.add_argument('-o', '--output', help='Output file name.', required=True, type=str)
 
     args = parser.parse_args()
 
     # Get parameters:
-    # inputFolder = args.input
-    # output = args.output
-    ensemblFile = args.ensemblFile
+    config_file = args.config
+    ensembl_file = args.reference
+    input_folder = args.inputFolder
+    output_file = args.output
+
+    ## TODO: add tests here.
 
     # 1. Generate first table.
     covid_core_data = integrator(ensemblFile)
 
-    # 2. Integrate the following files. For each files indicate which columns to be joined. If left empty, just a flag will be added. 
-    input_to_parse = {
-        'uniprot_covid19_parsed.tsv': {
-            'columns': [], # columns to add.
-            'flag': True, # Generate just a flag (indicating if a given gene/protein) is in the integrated dataset
-            'label': 'COVID-19 UniprotKB', # Label of the flag column.
-            'how': 'outer', # How to merge the tables
-            'columns_to_map': {
-                'taxon_id': 'taxon_id',
-                'uniprot_ids': 'uniprot_accessions'
-            }
-        }
-    }
+    # 2. Reading configuration:
+    with open(config_file, 'rt') as f:
+        config_data = json.load(f)
 
     # Integrating all parsed datasets:
-    for source_file, parameters in input_to_parse.items():
-        integrator.add_data(source_file, parameters=parameters)
-
+    for source_file, parameters in config_data.items():
+        integrator.add_data('{}/{}'.format(input_folder, source_file), parameters=parameters)
 
 
 if __name__ == '__main__':

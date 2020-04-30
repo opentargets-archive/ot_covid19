@@ -25,29 +25,13 @@ make all
 
 `make all` downloads all data, builds Python environment, run parsers and the integrator script(s).
 
-#### Fetch data only:
+#### Other actions:
 
-```bash
-make downloads
-```
-
-#### Run parsers only:
-
-```bash
-make parsers
-```
-
-#### Run integrator:
-
-```bash
-make integrator
-```
-
-#### Remove temporary files:
-
-```bash
-make clean
-```
+* `make setup-environment` - building Python environment
+* `make downloads` - download files only
+* `make parsers` - run parsers only
+* `make integrator` - run integrator(s) only
+* `make clean-all` - removing temporary files.
 
 ## Directory structure
 
@@ -69,9 +53,10 @@ make clean
 
 For the integration part the concept is that we want to keep out logic altogether from the integrator scripts. All data processing steps should happen earlier in the parsing and pre-processing steps. Integrator scripts take tables with columns that are ready to be added to the final tables. So there are a few requirements:
 
-1. Tables are read from `/temp/preformated_tables` directory only.
+1. Tables are read from `/temp/preformated_tables` directory only
+2. The tables must be in an uncompressed tsv format
 2. Tables must have a column called `id` containing unique identifiers (eg. Ensembl gene id or Uniprot primary accession)
-3. Tables to be integrated must be added to the integration config files describing how the integration should happen.
+3. Tables to be integrated must be added to the integration config files describing how the integration should happen
 
 #### Integration configuration:
 
@@ -98,7 +83,7 @@ Where:
 * `columns_to_map` - column mapping to populate existing fields for the new targets.
 
 
-This recipe shows how to integrate a dataset where we are not expecting new targets, and two new columns are added to the dataset:
+This recipe shows how to integrate a dataset where we are not expecting new targets, and two new columns are added to the final table:
 
 ```json
 "ot_drugs_processed.tsv": {
