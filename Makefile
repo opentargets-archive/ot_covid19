@@ -28,6 +28,9 @@ COVIDCOMPLEXURL=http://ftp.ebi.ac.uk/pub/databases/IntAct/complex/current/comple
 # IntAct COVID related interaction query:
 INTACTCOVIDURL="https://www.ebi.ac.uk/intact/export?format=mitab_27&query=annot%3A%22dataset%3ACoronavirus%22&negative=false&spoke=false&ontology=false&sort=intact-miscore&asc=false"
 
+# HPA
+HPAURL=https://www.proteinatlas.org/download/proteinatlas.json.gz
+
 # Drug ChEMBL
 CHEMBLMOLECULEURL=https://www.ebi.ac.uk/chembl/api/data/molecule.json
 CHEMBLDRUGINDICATIONURL=https://www.ebi.ac.uk/chembl/api/data/drug_indication.json
@@ -89,6 +92,8 @@ CHEMBLMOA=$(RAWDIR)/chembl_mechanisms.json
 ## Interactions
 COVIDCOMPLEX=$(RAWDIR)/complex_sars-cov-2.tsv
 INTACTCOVID=$(RAWDIR)/IntAct_SARS-COV-2_interactions.tsv
+## Baseline/Protein Expression
+HPA=$(RAWDIR)/hpa.json
 
 ######################################################
 # PARSED FILES - Files with some intermediate parsing
@@ -127,7 +132,7 @@ setup-environment:
 	$(PIPENV) install
 
 ## Downlad files
-downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTBASELINETISSUEMAP) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL)
+downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTBASELINETISSUEMAP) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL) $(HPA)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) $(ENSEMBLPARSED) $(OTBASELINEPARSED)
@@ -198,6 +203,8 @@ $(COVIDCOMPLEX):
 $(INTACTCOVID):
 	$(CURL) $(INTACTCOVIDURL) > $@
 
+$(HPA):
+	$(CURL) $(HPAURL) | $(GUNZIP) -c | $(JQ) -r '.[] | @json' > $@
 
 ##
 ## Running parser:
@@ -209,13 +216,13 @@ $(UNIPROTCOVIDPARSED): $(UNIPROTCOVIDFLATFILE)
 $(OTDRUGEVIDENCE):
 	$(JQ) -r 'select(.sourceID == "chembl") | [.target.id, .disease.id, .drug.id, .evidence.drug2clinic.clinical_trial_phase.numeric_index, .evidence.target2drug.action_type, .drug.molecule_name] | @tsv' $(OTEVIDENCE) | $(SED) -e 's/http:\/\/identifiers.org\/chembl.compound\///g' > $@
 
-$(COVIDCOMPLEXPARSED):
+$(COVIDCOMPLEXPARSED): $(COVIDCOMPLEX)
 	$(PIPENV) run python $(SRCDIR)/parsers/complex_parser.py -i $(COVIDCOMPLEX) -o $(COVIDCOMPLEXPARSED)
 
-$(ENSEMBLPARSED):
+$(ENSEMBLPARSED): $(COVIDCOMPLEX)
 	$(PIPENV) run python $(SRCDIR)/parsers/ensembl_parser.py -i $(ENSEMBL) -o $(ENSEMBLPARSED)
 
-$(INTACTCOVIDPARSED):
+$(INTACTCOVIDPARSED): $(INTACTCOVID)
 	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $(INTACTCOVIDPARSED)
 
 $(OTBASELINEPARSED):
