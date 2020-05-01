@@ -1,109 +1,103 @@
 import json
+import gzip
 import pandas as pd
 import argparse
 import logging
-import copy
 
-logger = logging.getLogger(__name__)
+class Safety():
 
-def get_tissue_mappings(mapping_filename):
-    """Return a dictionary that maps tissue names to anatomical systems and organs"""
+    def __init__(self):
+        self._logger = logger = logging.getLogger(__name__)
+        self.target_safety_info = {}
+        self.gene_name2ensembl_map = {}
 
-    with open(mapping_filename, 'r') as mappings_file:
-        mapping_dict = json.load(mappings_file)
-        return mapping_dict['tissues']
+    def get_gene_name2ensembl_mappings(self, filename):
+        """Return a dictionary that maps gene names to Ensembl ids"""
 
-def initialise_expression_dict(mapping_dictionary):
-
-    # Extract anatomical systems
-    anatomical_systems = set()
-    for tissues, mappings in mapping_dictionary.items():
-        anatomical_systems.update(mappings['anatomical_systems'])
-
-    # Initialise scoring dictionary
-    expression_dict={}
-    for anatomical_system in anatomical_systems:
-        expression_dict[anatomical_system + " (y/n)"]="No"
-        expression_dict[anatomical_system + " (list)"]=[]
-
-    return expression_dict
-
-def parse_baseline(baseline_filename, tissue_mapping, output_filename):
+        # Load gene info file an iterate through every gene
+        with gzip.open(filename, 'rt') as gene_file:
+            for line in gene_file:
+                gene_info_dict = json.loads(line.strip())
+                if gene_info_dict['name'] in self.gene_name2ensembl_map:
+                    self.gene_name2ensembl_map[gene_info_dict['name']].append(gene_info_dict['ensembl_id'])
+                else:
+                    self.gene_name2ensembl_map[gene_info_dict['name']] = [gene_info_dict['ensembl_id']]
 
 
-    baseline_df = pd.read_csv(baseline_filename, sep='\t', header=0, index_col=0)
+    def build_json_safety(self, filename):
+        """ Read known target safety file and create dictionary with affected organs"""
 
-    # Check that column names in baseline file exist in mapping file
-    columns_to_drop = []
-    for column in baseline_df.columns:
-        if column not in tissue_mapping:
-            logger.warning("{} is not a supported tissue, skipping it".format(column))
-            columns_to_drop.append(column)
+        with open(filename, 'r') as known_safety:
+            known_safety_data = json.load(known_safety)
+            for gene, liabilities in known_safety_data.items():
+                affected_systems = set()
+                # Targets may contain "andverse_effects" and/or "safety_risk_info"
+                for liability_type, info in liabilities.items():
+                    for effects in info:
+                        for system in effects['organs_systems_affected']:
+                            affected_systems.add(system['mapped_term'])
+                if gene in self.gene_name2ensembl_map:
+                    for ensembl_id in self.gene_name2ensembl_map[gene]:
+                        if ensembl_id in self.target_safety_info:
+                            self.target_safety_info[ensembl_id]['organs_systems_affected'].update(affected_systems)
+                        else:
+                            self.target_safety_info[ensembl_id] = {'name': gene,
+                                                     'safety_risk': True,
+                                                     'organs_systems_affected': affected_systems}
 
-    # Drop unmapped tissues
-    if columns_to_drop:
-        baseline_df.drop(columns_to_drop, axis=1, inplace=True)
+    def build_json_experimental_toxicity(self, filename):
+        """Read experimental toxicity file and ..."""
+        pass
 
-    empty_expression_dict = initialise_expression_dict(tissue_mapping)
-    expression_per_anatomical_systems_dict = {}
-    # Iterate all genes
-    for gene, expression in baseline_df.to_dict('index').items():
-        expression_per_anatomical_systems_dict[gene] = copy.deepcopy(empty_expression_dict)
-        for tissue in expression:
-            # Gene is considered expressed if > 6 tpm
-            if expression[tissue] > 6:
-                for anat_sys in tissue_mapping[tissue]['anatomical_systems']:
-                    expression_per_anatomical_systems_dict[gene][anat_sys + " (y/n)"] = "Yes"
-                    expression_per_anatomical_systems_dict[gene][anat_sys + " (list)"].append(tissue)
-    expression_per_anatomical_systems_df = pd.DataFrame.from_dict(expression_per_anatomical_systems_dict, orient='index', columns=empty_expression_dict.keys())
-    expression_per_anatomical_systems_df.index.name = "ID"
+    def parse_safety(self, known_safety_file, experimental_toxicity_file , compressed_gene_file, output_filename):
 
-    # Drop anatomical systems where no gene is expressed - happens for sensory system
-    # Find columns with single unique value - only yes/no columns can be used as lists are not hashable
-    columns_count_unique = expression_per_anatomical_systems_df.filter(regex="(y/n)").nunique()
-    columns_single_unique_value = columns_count_unique[columns_count_unique==1].index
+        # Load gene name to Ensembl id mappings
+        self.get_gene_name2ensembl_mappings(compressed_gene_file)
 
-    # Check that the unique values are either "No" or empty list
-    empty_columns = []
-    for column in columns_single_unique_value:
-        unique_value = expression_per_anatomical_systems_df[column].unique()[0]
-        if unique_value == "No":
-            # Add both yes/no column and list column to list to be removed
-            empty_columns.append(column)
-            empty_columns.append(column.replace("y/n", "list"))
-    expression_per_anatomical_systems_df.drop(columns=empty_columns, inplace=True)
+        # Extract needed information from known target safety file
+        self.build_json_safety(known_safety_file)
 
-    # Write to file
-    expression_per_anatomical_systems_df.to_csv(output_filename, sep='\t')
+        # Extract needed information from experimental toxicity file
+        self.build_json_experimental_toxicity(experimental_toxicity_file)
+
+        # Write to tsv file
+        #with open(output_filename, 'wt') as output_file:
+        #    dict_writer = csv.DictWriter(output_file, fieldnames=['ID', ''], delimiter='\t')
+        safety_df = pd.DataFrame.from_dict(self.target_safety_info, orient='index', columns=['name', 'safety_risk', 'organs_systems_affected'])
+        safety_df.index.name = "ID"
+        safety_df.to_csv(output_filename, sep='\t')
 
 def main():
 
     # Parse CLI parameters
-    parser = argparse.ArgumentParser(description='Parse baseline expression file and report the anatomical systems where each target is expressed.')
-    parser.add_argument('-i','--input',
-                        help='Baseline expression tab-separated file',
-                        type=str, default='ot_baseline.tsv')
+    parser = argparse.ArgumentParser(description='Parse known target safety and eperimental toxicity files and report the genes with safety information and the affected organs if available.')
+    parser.add_argument('-k','--knownTargetSafetyFile',
+                        help='Name of JSON file with known target safety information',
+                        type=str, default='ot_know_target_safety.json')
 
-    parser.add_argument('-m','--mapping',
-                        help='Name of file that maps tissues to anatomical systems',
-                        type=str, default='ot_map_with_efos.json')
+    parser.add_argument('-e','--experimentalToxicityFile',
+                        help='Name of TSV/TAB file with experimental toxicity information',
+                        type=str, default='ot_experimental_toxicity.tsv')
+
+    parser.add_argument('-g', '--geneFile',
+                        help='Name of file with gene information',
+                        type=str, default='ensembl_parsed.json.gz')
 
     parser.add_argument('-o','--output',
                         help='Output file name',
-                        type=str, default='baseline_expression_per_anatomical_system.tsv')
-
-
+                        type=str, default='target_safety.tsv')
 
     args = parser.parse_args()
 
     # Get parameters:
-    input_file = args.input
-    mapping_file = args.mapping
+    known_safety_file = args.knownTargetSafetyFile
+    experimental_toxicity_file = args.experimentalToxicityFile
+    gene_file = args.geneFile
     output_file = args.output
 
-    # Load tissue mappings
-    tissue_mappings = get_tissue_mappings(mapping_file)
-    parse_baseline(input_file, tissue_mappings, output_file)
+    safety = Safety()
+    safety.parse_safety(known_safety_file, experimental_toxicity_file, gene_file, output_file)
+
 
 if __name__ == '__main__':
     main()
