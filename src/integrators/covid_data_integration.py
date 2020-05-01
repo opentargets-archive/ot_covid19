@@ -3,6 +3,8 @@ import argparse
 import gzip
 import json
 import requests
+from os import listdir
+from os.path import isfile, join
 
 # 
 
@@ -170,7 +172,9 @@ def main():
     input_folder = args.inputFolder
     output_file = args.output
 
-    ## TODO: add tests here.
+    # Reading files from the preformatted folder:
+    preformatted_files = [f for f in listdir(input_folder) if isfile(join(input_folder, f))]
+    print('[Info] Integrating the following files:\n\t{}'.format('\n\t '.join(preformatted_files)))
 
     # 1. Generate first table.
     integrator_obj = DataIntegrator(ensembl_file)
@@ -180,8 +184,23 @@ def main():
         config_data = json.load(f)
 
     # Integrating all parsed datasets:
-    for source_file, parameters in config_data.items():
-        data_df = pd.read_csv('{}/{}'.format(input_folder, source_file), sep='\t')
+    for preformatted_file in preformatted_files:
+
+        # try open file:
+        try:
+            data_df = pd.read_csv('{}/{}'.format(input_folder,preformatted_file), sep='\t')
+        except:
+            print('[Error] Could not open {} as tsv.'.format(preformatted_file))
+            raise
+
+        # Testing if table has id:
+        if 'id' not in data_df.columns.tolist():
+            raise ValueError('The table must have \'id\' column to join.')
+
+        # Read or generate join parameters:
+        parameters = config_data[preformatted_file] if preformatted_file in config_data else {'columns':data_df.columns.tolist()}
+
+        # Integrating:
         integrator_obj.add_data(data_df, parameters)
 
     # Map taxonomy to species:
