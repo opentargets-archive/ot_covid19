@@ -14,7 +14,8 @@ UNIPROTIDMAPPINGURL=ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/
 
 # OT files
 OTTRACTABILITYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/tractability_buckets-2020-03-26.tsv
-OTSAFETYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/known_target_safety-2020-04-01.json
+OTKNOWNTARGETSAFETYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/known_target_safety-2020-04-01.json
+OTEXPERIMENTALTOXICITYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/experimental-toxicity-2020-04-07.tsv
 OTBASELINEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/exp_summary_NormCounts_genes_all_Blueprint2_v2-2020-04-01.txt
 OTBASELINETISSUEMAPGITHUB=https://raw.githubusercontent.com/opentargets/expression_hierarchy/master/process/map_with_efos.json
 OTEVIDENCEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/output/20.04_evidence_data.json.gz
@@ -78,7 +79,8 @@ ENSEMBL=$(RAWDIR)/ensembl.json
 WIKIDATAPROTEINS=$(RAWDIR)/wikidata_proteins.tsv
 ## OT
 OTTRACTABILITY=$(RAWDIR)/ot_tractability.tsv
-OTSAFETY=$(RAWDIR)/ot_safety.json
+OTKNOWNTARGETSAFETY=$(RAWDIR)/ot_know_target_safety.json
+OTEXPERIMENTALTOXICITY=$(RAWDIR)/ot_experimental_toxicity.tsv
 OTBASELINE=$(RAWDIR)/ot_baseline.txt
 OTBASELINETISSUEMAP=$(RAWDIR)/ot_map_with_efos.json
 OTEVIDENCE=$(RAWDIR)/ot_evidence.json
@@ -132,7 +134,7 @@ setup-environment:
 	$(PIPENV) install
 
 ## Downlad files
-downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTSAFETY) $(OTBASELINE) $(OTBASELINETISSUEMAP) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL) $(HPA)
+downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTKNOWNTARGETSAFETY) $(OTEXPERIMENTALTOXICITY) $(OTBASELINE) $(OTBASELINETISSUEMAP) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL) $(HPA)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) $(ENSEMBLPARSED) $(OTBASELINEPARSED)
@@ -167,8 +169,11 @@ $(WIKIDATAPROTEINS):
 $(OTTRACTABILITY):
 	$(CURL) $(OTTRACTABILITYBUCKET) > $@
 
-$(OTSAFETY):
-	$(CURL) $(OTSAFETYBUCKET) > $@
+$(OTKNOWNTARGETSAFETY):
+	$(CURL) $(OTKNOWNTARGETSAFETYBUCKET) > $@
+
+$(OTEXPERIMENTALTOXICITY):
+	$(CURL) $(OTEXPERIMENTALTOXICITYBUCKET) > $@
 
 $(OTBASELINE):
 	$(CURL) $(OTBASELINEBUCKET) > $@
