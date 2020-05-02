@@ -174,7 +174,7 @@ def main():
 
     # Reading files from the preformatted folder:
     preformatted_files = [f for f in listdir(input_folder) if isfile(join(input_folder, f))]
-    print('[Info] Integrating the following files:\n\t{}'.format('\n\t '.join(preformatted_files)))
+    print('[Info] Integrating the following files:\n\t{}'.format('\n\t'.join(preformatted_files)))
 
     # 1. Generate first table.
     integrator_obj = DataIntegrator(ensembl_file)
