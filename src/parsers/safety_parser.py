@@ -46,8 +46,17 @@ class Safety():
                                                      'organs_systems_affected': affected_systems}
 
     def build_json_experimental_toxicity(self, filename):
-        """Read experimental toxicity file and ..."""
-        pass
+        """Read experimental toxicity file and output gene ids, leaving "name" and "organs_systems_affected" empty"""
+
+        experimental_toxicity_df = pd.read_csv(filename, sep='\t', header=0, index_col=0)
+        for ensembl_gene_id, info in experimental_toxicity_df.iterrows():
+            if ensembl_gene_id not in self.target_safety_info:
+                self.target_safety_info[ensembl_gene_id] = { 'safety_risk' : True,
+                                                             'name' : None,
+                                                             'organs_systems_affected' : None
+                                                             }
+
+
 
     def parse_safety(self, known_safety_file, experimental_toxicity_file , compressed_gene_file, output_filename):
 
