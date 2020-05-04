@@ -52,8 +52,8 @@ class Safety():
         for ensembl_gene_id, info in experimental_toxicity_df.iterrows():
             if ensembl_gene_id not in self.target_safety_info:
                 self.target_safety_info[ensembl_gene_id] = { 'safety_risk' : True,
-                                                             'name' : None,
-                                                             'organs_systems_affected' : None
+                                                             'name' : "N/A",
+                                                             'organs_systems_affected' : "N/A"
                                                              }
 
 
