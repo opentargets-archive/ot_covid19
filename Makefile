@@ -106,7 +106,7 @@ UNIPROTCOVIDPARSED=$(PREFORMATEDDIR)/uniprot_covid19_parsed.tsv
 ## OT
 OTDRUGEVIDENCE=$(PARSEDDIR)/ot_drug_evidence.tsv
 OTBASELINEPARSED=$(PARSEDDIR)/ot_baseline_expression_per_anatomical_system.tsv
-OTSAFETYPARSED=$(PARSEDDIR)/ot_target_safety.tsv
+OTSAFETYPARSED=$(PREFORMATEDDIR)/ot_target_safety.tsv
 OTTRACTABILITYPARSED=$(PREFORMATEDDIR)/ot_tractability_parsed.tsv
 ## Ensembl
 ENSEMBLPARSED=$(PARSEDDIR)/ensembl_parsed.json.gz
