@@ -106,15 +106,21 @@ UNIPROTCOVIDPARSED=$(PREFORMATEDDIR)/uniprot_covid19_parsed.tsv
 ## OT
 OTDRUGEVIDENCE=$(PARSEDDIR)/ot_drug_evidence.tsv
 OTBASELINEPARSED=$(PARSEDDIR)/ot_baseline_expression_per_anatomical_system.tsv
+OTTRACTABILITYPARSED=$(PREFORMATEDDIR)/ot_tractability_parsed.tsv
 ## Ensembl
 ENSEMBLPARSED=$(PARSEDDIR)/ensembl_parsed.json.gz
 ## Interactions
 COVIDCOMPLEXPARSED=$(PARSEDDIR)/complex_sars-cov-2_parsed.tsv
 INTACTCOVIDPARSED=$(PARSEDDIR)/IntAct_SARS-COV-2_interactions_parsed.tsv
+## HPA
+HPAPREFORMATTED=$(PREFORMATEDDIR)/hpa_parsed.tsv
+## Drug info for target
+DRUGFORTARGETPARSED=$(PREFORMATEDDIR)/drug_fortarget_parsed.tsv
 
 ###############################################################
 # PREFORMATED FILES - Files already formatted to be integrated
 ###############################################################
+
 
 INTEGRATED=$(RESULTDIR)/integrated_data.tsv
 
@@ -134,10 +140,15 @@ setup-environment:
 	$(PIPENV) install
 
 ## Downlad files
-downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTKNOWNTARGETSAFETY) $(OTEXPERIMENTALTOXICITY) $(OTBASELINE) $(OTBASELINETISSUEMAP) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) $(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) $(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL) $(HPA)
+downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTKNOWNTARGETSAFETY) $(OTEXPERIMENTALTOXICITY) \
+	$(OTBASELINE) $(OTBASELINETISSUEMAP) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) \
+	$(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) \
+	$(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL) $(HPA)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
-parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) $(ENSEMBLPARSED) $(OTBASELINEPARSED)
+parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) \
+		$(ENSEMBLPARSED) $(OTBASELINEPARSED) $(HPAPREFORMATTED) $(DRUGFORTARGETPARSED) \
+		$(OTTRACTABILITYPARSED)
 
 # CREATES TEMPORARY DIRECTORY
 create-temp:
@@ -230,14 +241,23 @@ $(ENSEMBLPARSED): $(COVIDCOMPLEX)
 $(INTACTCOVIDPARSED): $(INTACTCOVID)
 	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $(INTACTCOVIDPARSED)
 
-$(OTBASELINEPARSED):
+$(OTBASELINEPARSED): $(OTBASELINE) $(OTBASELINE)
 	$(PIPENV) run python $(SRCDIR)/parsers/baseline_parser.py -i $(OTBASELINE) -m $(OTBASELINETISSUEMAP) -o $(OTBASELINEPARSED)
+
+$(HPAPREFORMATTED): $(HPA)
+	$(PIPENV) run python $(SRCDIR)/parsers/hpa_parser.py -i $(HPA) -o $@
+
+$(DRUGFORTARGETPARSED): $(OTDRUGEVIDENCE)
+	$(PIPENV) run python $(SRCDIR)/parsers/target_druginfo_parser.py -i $(OTDRUGEVIDENCE) -o $@
+
+$(OTTRACTABILITYPARSED): $(OTTRACTABILITY)
+	$(PIPENV) run python $(SRCDIR)/parsers/tractability_parser.py -i $(OTTRACTABILITY) -o $@
 
 ##
 ## Integrate:
 ##
 
-$(INTEGRATED):
+$(INTEGRATED): parsers
 		$(PIPENV) run python $(SRCDIR)/integrators/covid_data_integration.py \
 			-r $(ENSEMBLPARSED) \
 			-o $(INTEGRATED) \
