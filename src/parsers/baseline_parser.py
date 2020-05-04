@@ -56,7 +56,7 @@ def parse_baseline(baseline_filename, tissue_mapping, output_filename):
                     expression_per_anatomical_systems_dict[gene][anat_sys + " (y/n)"] = "Yes"
                     expression_per_anatomical_systems_dict[gene][anat_sys + " (list)"].append(tissue)
     expression_per_anatomical_systems_df = pd.DataFrame.from_dict(expression_per_anatomical_systems_dict, orient='index', columns=empty_expression_dict.keys())
-    expression_per_anatomical_systems_df.index.name = "ID"
+    expression_per_anatomical_systems_df.index.name = "id"
 
     # Drop anatomical systems where no gene is expressed - happens for sensory system
     # Find columns with single unique value - only yes/no columns can be used as lists are not hashable
