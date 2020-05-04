@@ -8,5 +8,11 @@
             "taxon_id": "taxon_id",
             "uniprot_ids": "primary_accession"
         }
+    },
+    "ot_baseline_expression_per_anatomical_system.tsv":{
+        "columns": ["id","immune system (y/n)", "immune system (list)", "respiratory system (y/n)", "respiratory system (list)"]
+    },
+    "ot_target_safety.tsv":{
+        "columns": ["id", "safety_risk", "organs_systems_affected"]
     }
 }
