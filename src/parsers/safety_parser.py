@@ -43,7 +43,7 @@ class Safety():
                         else:
                             self.target_safety_info[ensembl_id] = {'name': gene,
                                                      'safety_risk': True,
-                                                     'organs_systems_affected': affected_systems}
+                                                     'organs_systems_affected': list(affected_systems)}
 
     def build_json_experimental_toxicity(self, filename):
         """Read experimental toxicity file and output gene ids, leaving "name" and "organs_systems_affected" empty"""
