@@ -72,7 +72,7 @@ class Safety():
         # Write to tsv file
         #with open(output_filename, 'wt') as output_file:
         #    dict_writer = csv.DictWriter(output_file, fieldnames=['ID', ''], delimiter='\t')
-        safety_df = pd.DataFrame.from_dict(self.target_safety_info, orient='index', columns=['safety_risk', 'organs_systems_affected'])
+        safety_df = pd.DataFrame.from_dict(self.target_safety_info, orient='index', columns=['name', 'safety_risk', 'organs_systems_affected'])
         safety_df.index.name = "id"
         safety_df.to_csv(output_filename, sep='\t')
 
