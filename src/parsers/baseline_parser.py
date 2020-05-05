@@ -69,18 +69,18 @@ def parse_baseline(baseline_filename, tissue_mapping, output_filename):
     expression_per_anatomical_systems_df.index.name = "id"
 
     # Drop anatomical systems where no gene is expressed - happens for sensory system
-    # Find columns with single unique value - only yes/no columns can be used as lists are not hashable
-    columns_count_unique = expression_per_anatomical_systems_df.filter(regex="(y/n)").nunique()
+    # Find columns with single unique value - only "is_expressed" columns can be used as lists are not hashable
+    columns_count_unique = expression_per_anatomical_systems_df.filter(regex="is_expressed").nunique()
     columns_single_unique_value = columns_count_unique[columns_count_unique==1].index
 
-    # Check that the unique values are either "No" or empty list
+    # Check that the unique values are either False or empty list
     empty_columns = []
     for column in columns_single_unique_value:
         unique_value = expression_per_anatomical_systems_df[column].unique()[0]
-        if unique_value == "No":
-            # Add both yes/no column and list column to list to be removed
+        if unique_value == False:
+            # Add both "is_expressed" column and list column to list to be removed
             empty_columns.append(column)
-            empty_columns.append(column.replace("y/n", "list"))
+            empty_columns.append(column.replace("is_expressed", "expressed_system_list"))
     expression_per_anatomical_systems_df.drop(columns=empty_columns, inplace=True)
 
     # Write to file
