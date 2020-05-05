@@ -51,10 +51,11 @@ def parse_baseline(baseline_filename, tissue_mapping, output_filename):
         baseline_df.drop(columns_to_drop, axis=1, inplace=True)
 
     empty_expression_dict = initialise_expression_dict(tissue_mapping)
-    expression_per_anatomical_systems_dict = {}
+    expression_per_anatomical_systems_list = []
     # Iterate all genes
     for gene, expression in baseline_df.to_dict('index').items():
-        expression_per_anatomical_systems_dict[gene] = copy.deepcopy(empty_expression_dict)
+        expression_per_anatomical_systems_dict = copy.deepcopy(empty_expression_dict)
+        expression_per_anatomical_systems_dict['id'] = gene
         for tissue in expression:
             # Gene is considered expressed if > 6 tpm
             if expression[tissue] > 6:
@@ -62,11 +63,14 @@ def parse_baseline(baseline_filename, tissue_mapping, output_filename):
                     # Remove white spaces
                     anat_sys_clean_name = anat_sys.strip().replace(" ", "_")
                     #expression_per_anatomical_systems_dict[gene][anat_sys + " (y/n)"] = "Yes"
-                    expression_per_anatomical_systems_dict[gene][anat_sys_clean_name]['is_expressed'] = True
+                    expression_per_anatomical_systems_dict[anat_sys_clean_name]['is_expressed'] = True
                     #expression_per_anatomical_systems_dict[gene][anat_sys + " (list)"].append(tissue)
-                    expression_per_anatomical_systems_dict[gene][anat_sys_clean_name]['expressed_system_list'].append(tissue)
-    expression_per_anatomical_systems_df = pd.DataFrame.from_dict(expression_per_anatomical_systems_dict, orient='index', columns=empty_expression_dict.keys())
-    expression_per_anatomical_systems_df.index.name = "id"
+                    expression_per_anatomical_systems_dict[anat_sys_clean_name]['expressed_system_list'].append(tissue)
+        expression_per_anatomical_systems_list.append(expression_per_anatomical_systems_dict)
+    #expression_per_anatomical_systems_df = pd.DataFrame.from_dict(expression_per_anatomical_systems_dict, orient='index', columns=empty_expression_dict.keys())
+    expression_per_anatomical_systems_df = pd.json_normalize(expression_per_anatomical_systems_list, max_level=1, sep="_")
+    #print(expression_per_anatomical_systems_df.head())
+    #expression_per_anatomical_systems_df.index.name = "id"
 
     # Drop anatomical systems where no gene is expressed - happens for sensory system
     # Find columns with single unique value - only "is_expressed" columns can be used as lists are not hashable
@@ -84,7 +88,7 @@ def parse_baseline(baseline_filename, tissue_mapping, output_filename):
     expression_per_anatomical_systems_df.drop(columns=empty_columns, inplace=True)
 
     # Write to file
-    expression_per_anatomical_systems_df.to_csv(output_filename, sep='\t')
+    expression_per_anatomical_systems_df.to_csv(output_filename, sep='\t', index=False)
 
 def main():
 
