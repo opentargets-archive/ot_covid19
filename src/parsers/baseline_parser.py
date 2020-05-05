@@ -29,7 +29,7 @@ def initialise_expression_dict(mapping_dictionary):
         #expression_dict[anatomical_system + " (list)"]=[]
         expression_dict[anatomical_system_clean_name] = {
             'is_expressed' : False,
-            'expressed_system_list' : []
+            'expressed_tissue_list' : []
         }
 
     return expression_dict
