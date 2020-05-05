@@ -47,8 +47,8 @@ class Safety():
                             self.target_safety_info[ensembl_id]['organs_systems_affected'].update(affected_systems)
                         else:
                             self.target_safety_info[ensembl_id] = {'name': gene,
-                                                     'safety_risk': True,
-                                                     'organs_systems_affected': list(affected_systems)}
+                                                     'has_safety_risk': True,
+                                                     'safety_organs_systems_affected': list(affected_systems)}
 
     def build_json_experimental_toxicity(self, filename):
         """Read experimental toxicity file and output gene ids, leaving "name" and "organs_systems_affected" empty"""
@@ -56,9 +56,9 @@ class Safety():
         experimental_toxicity_df = pd.read_csv(filename, sep='\t', header=0, index_col=0)
         for ensembl_gene_id, info in experimental_toxicity_df.iterrows():
             if ensembl_gene_id not in self.target_safety_info:
-                self.target_safety_info[ensembl_gene_id] = { 'safety_risk' : True,
+                self.target_safety_info[ensembl_gene_id] = { 'has_safety_risk' : True,
                                                              'name' : "N/A",
-                                                             'organs_systems_affected' : "N/A"
+                                                             'safety_organs_systems_affected' : "N/A"
                                                              }
 
 
@@ -75,7 +75,7 @@ class Safety():
         self.build_json_experimental_toxicity(experimental_toxicity_file)
 
         # Write to tsv file
-        safety_df = pd.DataFrame.from_dict(self.target_safety_info, orient='index', columns=['name', 'safety_risk', 'organs_systems_affected'])
+        safety_df = pd.DataFrame.from_dict(self.target_safety_info, orient='index', columns=['name', 'has_safety_risk', 'safety_organs_systems_affected'])
         safety_df.index.name = "id"
         safety_df.to_csv(output_filename, sep='\t')
 
