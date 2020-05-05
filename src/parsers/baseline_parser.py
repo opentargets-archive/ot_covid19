@@ -23,8 +23,14 @@ def initialise_expression_dict(mapping_dictionary):
     # Initialise scoring dictionary
     expression_dict={}
     for anatomical_system in anatomical_systems:
-        expression_dict[anatomical_system + " (y/n)"]="No"
-        expression_dict[anatomical_system + " (list)"]=[]
+        # Remove white spaces
+        anatomical_system_clean_name = anatomical_system.strip().replace(" ", "_")
+        #expression_dict[anatomical_system + " (y/n)"]="No"
+        #expression_dict[anatomical_system + " (list)"]=[]
+        expression_dict[anatomical_system_clean_name] = {
+            'expressed' : False,
+            'expressed_system_list' : []
+        }
 
     return expression_dict
 
