@@ -31,7 +31,7 @@ class Safety():
             known_safety_data = json.load(known_safety)
             for gene, liabilities in known_safety_data.items():
                 affected_systems = set()
-                # Targets may contain "andverse_effects" and/or "safety_risk_info"
+                # Targets may contain "adverse_effects" and/or "safety_risk_info"
                 for liability_type, info in liabilities.items():
                     for effects in info:
                         for system in effects['organs_systems_affected']:
