@@ -25,8 +25,6 @@ def initialise_expression_dict(mapping_dictionary):
     for anatomical_system in anatomical_systems:
         # Remove white spaces
         anatomical_system_clean_name = anatomical_system.strip().replace(" ", "_")
-        #expression_dict[anatomical_system + " (y/n)"]="No"
-        #expression_dict[anatomical_system + " (list)"]=[]
         expression_dict[anatomical_system_clean_name] = {
             'is_expressed' : False,
             'expressed_tissue_list' : []
@@ -62,15 +60,10 @@ def parse_baseline(baseline_filename, tissue_mapping, output_filename):
                 for anat_sys in tissue_mapping[tissue]['anatomical_systems']:
                     # Remove white spaces
                     anat_sys_clean_name = anat_sys.strip().replace(" ", "_")
-                    #expression_per_anatomical_systems_dict[gene][anat_sys + " (y/n)"] = "Yes"
                     expression_per_anatomical_systems_dict[anat_sys_clean_name]['is_expressed'] = True
-                    #expression_per_anatomical_systems_dict[gene][anat_sys + " (list)"].append(tissue)
                     expression_per_anatomical_systems_dict[anat_sys_clean_name]['expressed_system_list'].append(tissue)
         expression_per_anatomical_systems_list.append(expression_per_anatomical_systems_dict)
-    #expression_per_anatomical_systems_df = pd.DataFrame.from_dict(expression_per_anatomical_systems_dict, orient='index', columns=empty_expression_dict.keys())
     expression_per_anatomical_systems_df = pd.json_normalize(expression_per_anatomical_systems_list, max_level=1, sep="_")
-    #print(expression_per_anatomical_systems_df.head())
-    #expression_per_anatomical_systems_df.index.name = "id"
 
     # Drop anatomical systems where no gene is expressed - happens for sensory system
     # Find columns with single unique value - only "is_expressed" columns can be used as lists are not hashable
