@@ -13,6 +13,6 @@
         "columns": ["id","immune_system_is_expressed", "immune_system_expressed_tissue_list", "respiratory_system_is_expressed", "respiratory_system_expressed_tissue_list"]
     },
     "ot_target_safety.tsv":{
-        "columns": ["id", "safety_risk", "organs_systems_affected"]
+        "columns": ["id", "has_safety_risk", "safety_info_source", "safety_organs_systems_affected"]
     }
 }
