@@ -61,7 +61,7 @@ def parse_baseline(baseline_filename, tissue_mapping, output_filename):
                     # Remove white spaces
                     anat_sys_clean_name = anat_sys.strip().replace(" ", "_")
                     expression_per_anatomical_systems_dict[anat_sys_clean_name]['is_expressed'] = True
-                    expression_per_anatomical_systems_dict[anat_sys_clean_name]['expressed_system_list'].append(tissue)
+                    expression_per_anatomical_systems_dict[anat_sys_clean_name]['expressed_tissue_list'].append(tissue)
         expression_per_anatomical_systems_list.append(expression_per_anatomical_systems_dict)
     expression_per_anatomical_systems_df = pd.json_normalize(expression_per_anatomical_systems_list, max_level=1, sep="_")
 
@@ -77,7 +77,7 @@ def parse_baseline(baseline_filename, tissue_mapping, output_filename):
         if unique_value == False:
             # Add both "is_expressed" column and list column to list to be removed
             empty_columns.append(column)
-            empty_columns.append(column.replace("is_expressed", "expressed_system_list"))
+            empty_columns.append(column.replace("is_expressed", "expressed_tissue_list"))
     expression_per_anatomical_systems_df.drop(columns=empty_columns, inplace=True)
 
     # Write to file
