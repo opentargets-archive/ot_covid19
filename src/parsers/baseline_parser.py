@@ -28,7 +28,7 @@ def initialise_expression_dict(mapping_dictionary):
         #expression_dict[anatomical_system + " (y/n)"]="No"
         #expression_dict[anatomical_system + " (list)"]=[]
         expression_dict[anatomical_system_clean_name] = {
-            'expressed' : False,
+            'is_expressed' : False,
             'expressed_system_list' : []
         }
 
@@ -59,8 +59,12 @@ def parse_baseline(baseline_filename, tissue_mapping, output_filename):
             # Gene is considered expressed if > 6 tpm
             if expression[tissue] > 6:
                 for anat_sys in tissue_mapping[tissue]['anatomical_systems']:
-                    expression_per_anatomical_systems_dict[gene][anat_sys + " (y/n)"] = "Yes"
-                    expression_per_anatomical_systems_dict[gene][anat_sys + " (list)"].append(tissue)
+                    # Remove white spaces
+                    anat_sys_clean_name = anat_sys.strip().replace(" ", "_")
+                    #expression_per_anatomical_systems_dict[gene][anat_sys + " (y/n)"] = "Yes"
+                    expression_per_anatomical_systems_dict[gene][anat_sys_clean_name]['is_expressed'] = True
+                    #expression_per_anatomical_systems_dict[gene][anat_sys + " (list)"].append(tissue)
+                    expression_per_anatomical_systems_dict[gene][anat_sys_clean_name]['expressed_system_list'].append(tissue)
     expression_per_anatomical_systems_df = pd.DataFrame.from_dict(expression_per_anatomical_systems_dict, orient='index', columns=empty_expression_dict.keys())
     expression_per_anatomical_systems_df.index.name = "id"
 
