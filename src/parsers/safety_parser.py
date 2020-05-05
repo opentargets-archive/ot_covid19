@@ -39,7 +39,7 @@ class Safety():
                             if system['mapped_term']:
                                 affected_systems.add(system['mapped_term'])
                             else:
-                                self._logger.warning("{} is not mapped to uberon, using it instead".format(system['term_in_paper']))
+                                self._logger.warning("The organ system \"{}\" in target {} is not mapped to uberon, using this term instead".format(system['term_in_paper'], gene))
                                 affected_systems.add(system['term_in_paper'])
                 if gene in self.gene_name2ensembl_map:
                     for ensembl_id in self.gene_name2ensembl_map[gene]:
