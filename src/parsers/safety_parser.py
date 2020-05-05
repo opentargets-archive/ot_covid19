@@ -7,7 +7,7 @@ import logging
 class Safety():
 
     def __init__(self):
-        self._logger = logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger(__name__)
         self.target_safety_info = {}
         self.gene_name2ensembl_map = {}
 
@@ -35,7 +35,12 @@ class Safety():
                 for liability_type, info in liabilities.items():
                     for effects in info:
                         for system in effects['organs_systems_affected']:
-                            affected_systems.add(system['mapped_term'])
+                            # Use mapped term unless this is an empty string, e.g. for "development", in such case use the term in the paper
+                            if system['mapped_term']:
+                                affected_systems.add(system['mapped_term'])
+                            else:
+                                self._logger.warning("{} is not mapped to uberon, using it instead".format(system['term_in_paper']))
+                                affected_systems.add(system['term_in_paper'])
                 if gene in self.gene_name2ensembl_map:
                     for ensembl_id in self.gene_name2ensembl_map[gene]:
                         if ensembl_id in self.target_safety_info:
