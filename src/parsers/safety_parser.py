@@ -7,7 +7,26 @@ import logging
 class Safety():
 
     def __init__(self):
+
+        # Configure logging
+        # Create logger
         self._logger = logging.getLogger(__name__)
+        self._logger.setLevel(logging.INFO)
+
+        # Create console handler
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+
+        # Create formatter
+        formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+
+        # Add formatter to ch
+        ch.setFormatter(formatter)
+
+        # Add ch to handler
+        self._logger.addHandler(ch)
+
+        # Dictionaries for storing safety info and gene name to Ensembl id mappings
         self.target_safety_info = {}
         self.gene_name2ensembl_map = {}
 
@@ -95,6 +114,7 @@ class Safety():
         # Include all targets in output file if flag is set.
         # This is useful to have a more readable output after integration
         if output_all:
+            self._logger.info("Outputting all targets")
             self.add_targets_without_safety_info(compressed_gene_file)
 
         # Write to tsv file
