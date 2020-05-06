@@ -122,7 +122,7 @@ DRUGFORTARGETPARSED=$(PREFORMATEDDIR)/drug_fortarget_parsed.tsv
 # PREFORMATED FILES - Files already formatted to be integrated
 ###############################################################
 
-
+COMPLEXPREFORMATTED=$(PREFORMATEDDIR)/complex_portal_preformatted.tsv
 INTEGRATED=$(RESULTDIR)/integrated_data.tsv
 
 #############################################################################
@@ -149,7 +149,7 @@ downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABIL
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) \
 		$(ENSEMBLPARSED) $(OTBASELINEPARSED) $(HPAPREFORMATTED) $(DRUGFORTARGETPARSED) \
-		$(OTTRACTABILITYPARSED) $(OTSAFETYPARSED)
+		$(OTTRACTABILITYPARSED) $(OTSAFETYPARSED) $(COMPLEXPREFORMATTED)
 
 # CREATES TEMPORARY DIRECTORY
 create-temp:
@@ -235,6 +235,9 @@ $(OTDRUGEVIDENCE):
 
 $(COVIDCOMPLEXPARSED): $(COVIDCOMPLEX)
 	$(PIPENV) run python $(SRCDIR)/parsers/complex_parser.py -i $(COVIDCOMPLEX) -o $(COVIDCOMPLEXPARSED)
+
+$(COMPLEXPREFORMATTED): $(COVIDCOMPLEX) $(COVIDCOMPLEXPARSED)
+	$(PIPENV) run python $(SRCDIR)/parsers/complex_portal_parser.py -i $(COVIDCOMPLEXPARSED) -o $(COMPLEXPREFORMATTED)
 
 $(ENSEMBLPARSED): $(COVIDCOMPLEX)
 	$(PIPENV) run python $(SRCDIR)/parsers/ensembl_parser.py -i $(ENSEMBL) -o $(ENSEMBLPARSED)
