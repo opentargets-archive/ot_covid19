@@ -39,6 +39,8 @@ def main():
     #     ) \
     #     .reset_index()
 
+    result = get_target_druginfo(df)
+
     result.to_csv(output_file, sep='\t', index=False)
 
 if __name__ == '__main__':
