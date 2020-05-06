@@ -1,6 +1,18 @@
 import argparse
 import pandas as pd 
 
+def get_target_druginfo(df):
+    """ Get number of drugs per target and max phase"""
+
+    result = df \
+        .groupby('id').agg(
+        max_phase=('phase', 'max'),
+        drugs_in_clinic=('drug_id', 'nunique')
+        ) \
+        .reset_index()
+
+    return result
+
 def main():
     
     # Parse command line arguments
@@ -20,12 +32,12 @@ def main():
                 sep = "\t", \
                 names = ["id", "disease_id", "drug_id", "phase", "moa", "drug_name"])
 
-    result = df \
-        .groupby('id').agg(
-            max_phase = ('phase', 'max'),
-            drugs_in_clinic = ('drug_id', 'nunique')
-        ) \
-        .reset_index()
+    # result = df \
+    #     .groupby('id').agg(
+    #         max_phase = ('phase', 'max'),
+    #         drugs_in_clinic = ('drug_id', 'nunique')
+    #     ) \
+    #     .reset_index()
 
     result.to_csv(output_file, sep='\t', index=False)
 
