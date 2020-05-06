@@ -27,7 +27,6 @@ def get_drug_info(df):
 def main():
     
     # Parse command line arguments
-    parser = argparse.ArgumentParser()
     parser = argparse.ArgumentParser(description='Parse information from OT drug evidence and aggregates info at the target level.')
 
     parser.add_argument('-i', '--input', help='OT drug evidence table', required=True, type=str)
@@ -44,13 +43,6 @@ def main():
     df = pd.read_csv(input_file, \
                 sep = "\t", \
                 names = ["id", "disease_id", "drug_id", "phase", "moa", "drug_name"])
-
-    # result = df \
-    #     .groupby('id').agg(
-    #         max_phase = ('phase', 'max'),
-    #         drugs_in_clinic = ('drug_id', 'nunique')
-    #     ) \
-    #     .reset_index()
 
     if entity == "target":
         result = get_target_druginfo(df)
