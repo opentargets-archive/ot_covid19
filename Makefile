@@ -281,7 +281,7 @@ $(TARGETSINTEGRATED): parsers
 			-r $(ENSEMBLPARSED) \
 			-o $(TARGETSINTEGRATED) \
 			-i $(PREFORMATEDDIR)/targets \
-			-c $(SRCDIR)/integrators/integration_config.json
+			-c $(SRCDIR)/integrators/integration_config.json \
 			-e targets
 
 ##Files with drug info
@@ -290,5 +290,5 @@ $(DRUGSINTEGRATED): parsers
 			-r $(DRUGSPARSED) \
 			-o $(DRUGSINTEGRATED) \
 			-i $(PREFORMATEDDIR)/drugs \
-			-c $(SRCDIR)/integrators/integration_config.json
+			-c $(SRCDIR)/integrators/integration_config.json \
 			-e drugs
