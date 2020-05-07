@@ -23,6 +23,8 @@ def get_drug_info(df):
         ) \
         .reset_index()
 
+    # Rename drug_id to id
+    result.rename(columns={'drug_id': 'id'} , inplace= True)
     return result
 
 def get_toy_covid_ct_table(df):
