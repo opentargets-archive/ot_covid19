@@ -32,7 +32,7 @@ def fetch_organism(tax_ids=[]):
         return None
 
 
-class DataIntegrator(object):
+class TargetDataIntegrator(object):
 
     def __init__(self, ensemblFile):
         
@@ -152,6 +152,46 @@ class DataIntegrator(object):
 
         # Update:
         self.ensembl_df = merged
+
+
+class DrugDataIntegrator(object):
+
+    def __init__(self, drugFile):
+
+        self.drug_df = pd.read_csv(drugFile, sep='\t', header=0)
+
+        print('[Info] Reading data complete. Number of drugs: {}'.format(len(self.drug_df.index)))
+        print('[Info] Processing data...')
+
+    def add_data(self, data_df, parameters):
+        """
+        Adding new drug data to the integrator
+        """
+        ##
+        ## Checking merge parameters
+        ##
+
+        # Checking columns of intereset:
+        columns = parameters['columns'] if 'columns' in parameters else []
+
+        # How to join:
+        how = parameters['how'] if 'how' in parameters else 'left'
+
+        ##
+        ## Join data:
+        ##
+
+        merged = self.drug_df.merge(data_df, how=how, on='id')
+        self.drug_df = merged
+
+    def get_integrated_data(self):
+        return self.drug_df
+
+    def save_integrated(self, file_name='test.tsv'):
+        if '.tsv' in file_name:
+            self.drug_df.to_csv(file_name, sep='\t', index=False)
+        if '.xlsx' in file_name:
+            self.drug_df.to_excel(file_name, index=False)
 
 
 def main():
