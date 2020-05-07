@@ -32,7 +32,7 @@ def fetch_organism(tax_ids=[]):
         return None
 
 
-class DataIntegrator(object):
+class TargetDataIntegrator(object):
 
     def __init__(self, ensemblFile):
         
@@ -154,30 +154,75 @@ class DataIntegrator(object):
         self.ensembl_df = merged
 
 
+class DrugDataIntegrator(object):
+
+    def __init__(self, drugFile):
+
+        self.drug_df = pd.read_csv(drugFile, sep='\t', header=0)
+
+        print('[Info] Reading data complete. Number of drugs: {}'.format(len(self.drug_df.index)))
+        print('[Info] Processing data...')
+
+    def add_data(self, data_df, parameters):
+        """
+        Adding new drug data to the integrator
+        """
+        ##
+        ## Checking merge parameters
+        ##
+
+        # Checking columns of intereset:
+        columns = parameters['columns'] if 'columns' in parameters else []
+
+        # How to join:
+        how = parameters['how'] if 'how' in parameters else 'left'
+
+        ##
+        ## Join data:
+        ##
+
+        merged = self.drug_df.merge(data_df, how=how, on='id')
+        self.drug_df = merged
+
+    def get_integrated_data(self):
+        return self.drug_df
+
+    def save_integrated(self, file_name='test.tsv'):
+        if '.tsv' in file_name:
+            self.drug_df.to_csv(file_name, sep='\t', index=False)
+        if '.xlsx' in file_name:
+            self.drug_df.to_excel(file_name, index=False)
+
+
 def main():
     # Parse command line arguments
-    parser = argparse.ArgumentParser()
     parser = argparse.ArgumentParser(description='This script integrates COVID-19 related datasets into a single table.')
 
     parser.add_argument('-r', '--reference', help='File with the reference dataset.', required=True, type=str)
     parser.add_argument('-c', '--config', help='Configuration file describing integration recipes.', required=True, type=str)
     parser.add_argument('-i', '--inputFolder', help='Folder from which the integrated files are read.', required=True, type=str)
     parser.add_argument('-o', '--output', help='Output file name.', required=True, type=str)
+    parser.add_argument('-e', '--entity', help='Type of the entity contained in the tables to be merged.', required=True,
+                        choices=['targets', 'drugs'])
 
     args = parser.parse_args()
 
     # Get parameters:
     config_file = args.config
-    ensembl_file = args.reference
+    reference_file = args.reference
     input_folder = args.inputFolder
     output_file = args.output
+    entity_type = args.entity
 
     # Reading files from the preformatted folder:
     preformatted_files = [f for f in listdir(input_folder) if isfile(join(input_folder, f))]
     print('[Info] Integrating the following files:\n\t{}'.format('\n\t'.join(preformatted_files)))
 
     # 1. Generate first table.
-    integrator_obj = DataIntegrator(ensembl_file)
+    if entity_type == "targets":
+        integrator_obj = TargetDataIntegrator(reference_file)
+    else:
+        integrator_obj = DrugDataIntegrator(reference_file)
 
     # 2. Reading configuration:
     with open(config_file, 'rt') as f:
@@ -188,7 +233,7 @@ def main():
 
         # try open file:
         try:
-            data_df = pd.read_csv('{}/{}'.format(input_folder,preformatted_file), sep='\t')
+            data_df = pd.read_csv('{}/{}'.format(input_folder, preformatted_file), sep='\t')
         except:
             print('[Error] Could not open {} as tsv.'.format(preformatted_file))
             raise
@@ -204,7 +249,8 @@ def main():
         integrator_obj.add_data(data_df, parameters)
 
     # Map taxonomy to species:
-    integrator_obj.map_taxonomy()
+    if entity_type == "targets":
+        integrator_obj.map_taxonomy()
 
     # Save data:
     integrator_obj.save_integrated(output_file)

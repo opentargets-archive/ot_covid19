@@ -102,28 +102,33 @@ HPA=$(RAWDIR)/hpa.json
 ######################################################
 
 ## Uniprot
-UNIPROTCOVIDPARSED=$(PREFORMATEDDIR)/uniprot_covid19_parsed.tsv
+UNIPROTCOVIDPARSED=$(PREFORMATEDDIR)/targets/uniprot_covid19_parsed.tsv
 ## OT
 OTDRUGEVIDENCE=$(PARSEDDIR)/ot_drug_evidence.tsv
-OTBASELINEPARSED=$(PREFORMATEDDIR)/ot_baseline_expression_per_anatomical_system.tsv
-OTSAFETYPARSED=$(PREFORMATEDDIR)/ot_target_safety.tsv
-OTTRACTABILITYPARSED=$(PREFORMATEDDIR)/ot_tractability_parsed.tsv
+OTBASELINEPARSED=$(PREFORMATEDDIR)/targets/ot_baseline_expression_per_anatomical_system.tsv
+OTSAFETYPARSED=$(PREFORMATEDDIR)/targets/ot_target_safety.tsv
+OTTRACTABILITYPARSED=$(PREFORMATEDDIR)/targets/ot_tractability_parsed.tsv
 ## Ensembl
 ENSEMBLPARSED=$(PARSEDDIR)/ensembl_parsed.json.gz
 ## Interactions
 COVIDCOMPLEXPARSED=$(PARSEDDIR)/complex_sars-cov-2_parsed.tsv
 INTACTCOVIDPARSED=$(PREFORMATEDDIR)/IntAct_SARS-COV-2_interactions_parsed.tsv
 ## HPA
-HPAPREFORMATTED=$(PREFORMATEDDIR)/hpa_parsed.tsv
+HPAPREFORMATTED=$(PREFORMATEDDIR)/targets/hpa_parsed.tsv
 ## Drug info for target
-DRUGFORTARGETPARSED=$(PREFORMATEDDIR)/drug_fortarget_parsed.tsv
+DRUGFORTARGETPARSED=$(PREFORMATEDDIR)/targets/drug_fortarget_parsed.tsv
+## Drug info
+DRUGSPARSED=$(PARSEDDIR)/drug_info.tsv
+## Toy table of drugs in clinical trials for COVID-19
+DRUGSCOVID19TRIALSPARSED=$(PREFORMATEDDIR)/drugs/covid19_ct_test.tsv
 
 ###############################################################
 # PREFORMATED FILES - Files already formatted to be integrated
 ###############################################################
 
-COMPLEXPREFORMATTED=$(PREFORMATEDDIR)/complex_portal_preformatted.tsv
-INTEGRATED=$(RESULTDIR)/integrated_data.tsv
+COMPLEXPREFORMATTED=$(PREFORMATEDDIR)/targets/complex_portal_preformatted.tsv
+TARGETSINTEGRATED=$(RESULTDIR)/targets_integrated_data.tsv
+DRUGSINTEGRATED=$(RESULTDIR)/drugs_integrated_data.tsv
 
 #############################################################################
 
@@ -149,18 +154,19 @@ downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABIL
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) \
 		$(ENSEMBLPARSED) $(OTBASELINEPARSED) $(HPAPREFORMATTED) $(DRUGFORTARGETPARSED) \
-		$(OTTRACTABILITYPARSED) $(OTSAFETYPARSED) $(COMPLEXPREFORMATTED)
+		$(OTTRACTABILITYPARSED) $(OTSAFETYPARSED) $(COMPLEXPREFORMATTED) $(DRUGSPARSED) $(DRUGSCOVID19TRIALSPARSED)
 
 # CREATES TEMPORARY DIRECTORY
 create-temp:
 	mkdir -p $(TEMPDIR)
 	mkdir -p $(RAWDIR)
 	mkdir -p $(PARSEDDIR)
-	mkdir -p $(PREFORMATEDDIR)
+	mkdir -p $(PREFORMATEDDIR)/targets
+	mkdir -p $(PREFORMATEDDIR)/drugs
 	mkdir -p $(RESULTDIR)
 
 ## Run integrator:
-integrate: $(INTEGRATED)
+integrate: $(TARGETSINTEGRATED) $(DRUGSINTEGRATED)
 
 ##
 ## Fetching data:
@@ -252,7 +258,7 @@ $(HPAPREFORMATTED): $(HPA)
 	$(PIPENV) run python $(SRCDIR)/parsers/hpa_parser.py -i $(HPA) -o $@
 
 $(DRUGFORTARGETPARSED): $(OTDRUGEVIDENCE)
-	$(PIPENV) run python $(SRCDIR)/parsers/target_druginfo_parser.py -i $(OTDRUGEVIDENCE) -o $@
+	$(PIPENV) run python $(SRCDIR)/parsers/target_druginfo_parser.py -i $(OTDRUGEVIDENCE) -o $@ -e target
 
 $(OTTRACTABILITYPARSED): $(OTTRACTABILITY)
 	$(PIPENV) run python $(SRCDIR)/parsers/tractability_parser.py -i $(OTTRACTABILITY) -o $@
@@ -260,13 +266,29 @@ $(OTTRACTABILITYPARSED): $(OTTRACTABILITY)
 $(OTSAFETYPARSED): $(OTKNOWNTARGETSAFETY) $(OTEXPERIMENTALTOXICITY) $(ENSEMBLPARSED)
 	$(PIPENV) run python $(SRCDIR)/parsers/safety_parser.py -k $(OTKNOWNTARGETSAFETY) -e $(OTEXPERIMENTALTOXICITY) -g $(ENSEMBLPARSED) -o $(OTSAFETYPARSED) -a
 
-##
-## Integrate:
-##
+$(DRUGSPARSED): $(OTDRUGEVIDENCE)
+	$(PIPENV) run python $(SRCDIR)/parsers/target_druginfo_parser.py -i $(OTDRUGEVIDENCE) -o $@ -e drug
 
-$(INTEGRATED): parsers
+$(DRUGSCOVID19TRIALSPARSED): $(OTDRUGEVIDENCE)
+	$(PIPENV) run python $(SRCDIR)/parsers/target_druginfo_parser.py -i $(OTDRUGEVIDENCE) -o $@ -e covid19_trials
+
+##
+## Integrate files:
+##
+##Files with target info
+$(TARGETSINTEGRATED): parsers
 		$(PIPENV) run python $(SRCDIR)/integrators/covid_data_integration.py \
 			-r $(ENSEMBLPARSED) \
-			-o $(INTEGRATED) \
-			-i $(PREFORMATEDDIR) \
-			-c $(SRCDIR)/integrators/integration_config.json
+			-o $(TARGETSINTEGRATED) \
+			-i $(PREFORMATEDDIR)/targets \
+			-c $(SRCDIR)/integrators/integration_config.json \
+			-e targets
+
+##Files with drug info
+$(DRUGSINTEGRATED): parsers
+		$(PIPENV) run python $(SRCDIR)/integrators/covid_data_integration.py \
+			-r $(DRUGSPARSED) \
+			-o $(DRUGSINTEGRATED) \
+			-i $(PREFORMATEDDIR)/drugs \
+			-c $(SRCDIR)/integrators/integration_config.json \
+			-e drugs
