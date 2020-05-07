@@ -196,7 +196,6 @@ class DrugDataIntegrator(object):
 
 def main():
     # Parse command line arguments
-    parser = argparse.ArgumentParser()
     parser = argparse.ArgumentParser(description='This script integrates COVID-19 related datasets into a single table.')
 
     parser.add_argument('-r', '--reference', help='File with the reference dataset.', required=True, type=str)
