@@ -203,21 +203,27 @@ def main():
     parser.add_argument('-c', '--config', help='Configuration file describing integration recipes.', required=True, type=str)
     parser.add_argument('-i', '--inputFolder', help='Folder from which the integrated files are read.', required=True, type=str)
     parser.add_argument('-o', '--output', help='Output file name.', required=True, type=str)
+    parser.add_argument('-e', '--entity', help='Type of the entity contained in the tables to be merged.', required=True,
+                        choices=['targets', 'drugs'])
 
     args = parser.parse_args()
 
     # Get parameters:
     config_file = args.config
-    ensembl_file = args.reference
+    reference_file = args.reference
     input_folder = args.inputFolder
     output_file = args.output
+    entity_type = args.entity
 
     # Reading files from the preformatted folder:
     preformatted_files = [f for f in listdir(input_folder) if isfile(join(input_folder, f))]
     print('[Info] Integrating the following files:\n\t{}'.format('\n\t'.join(preformatted_files)))
 
     # 1. Generate first table.
-    integrator_obj = DataIntegrator(ensembl_file)
+    if entity_type == "targets":
+        integrator_obj = TargetDataIntegrator(reference_file)
+    else:
+        integrator_obj = DrugDataIntegrator(reference_file)
 
     # 2. Reading configuration:
     with open(config_file, 'rt') as f:
@@ -228,7 +234,7 @@ def main():
 
         # try open file:
         try:
-            data_df = pd.read_csv('{}/{}'.format(input_folder,preformatted_file), sep='\t')
+            data_df = pd.read_csv('{}/{}'.format(input_folder, preformatted_file), sep='\t')
         except:
             print('[Error] Could not open {} as tsv.'.format(preformatted_file))
             raise
@@ -244,7 +250,8 @@ def main():
         integrator_obj.add_data(data_df, parameters)
 
     # Map taxonomy to species:
-    integrator_obj.map_taxonomy()
+    if entity_type == "targets":
+        integrator_obj.map_taxonomy()
 
     # Save data:
     integrator_obj.save_integrated(output_file)
