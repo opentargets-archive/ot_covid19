@@ -166,7 +166,7 @@ create-temp:
 	mkdir -p $(RESULTDIR)
 
 ## Run integrator:
-integrate: $(INTEGRATED)
+integrate: $(TARGETSINTEGRATED) $(DRUGSINTEGRATED)
 
 ##
 ## Fetching data:
@@ -276,7 +276,7 @@ $(DRUGSCOVID19TRIALSPARSED): $(OTDRUGEVIDENCE)
 ## Integrate files:
 ##
 ##Files with target info
-$(INTEGRATED): parsers
+$(TARGETSINTEGRATED): parsers
 		$(PIPENV) run python $(SRCDIR)/integrators/covid_data_integration.py \
 			-r $(ENSEMBLPARSED) \
 			-o $(TARGETSINTEGRATED) \
@@ -285,7 +285,7 @@ $(INTEGRATED): parsers
 			-e targets
 
 ##Files with drug info
-$(INTEGRATED): parsers
+$(DRUGSINTEGRATED): parsers
 		$(PIPENV) run python $(SRCDIR)/integrators/covid_data_integration.py \
 			-r $(DRUGSPARSED) \
 			-o $(DRUGSINTEGRATED) \
