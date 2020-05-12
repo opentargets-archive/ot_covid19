@@ -117,7 +117,6 @@ def get_second_level_interactions(indirect_interactions_list, human_interactions
             except: 
                 secondary_interactions[row['interactor_a']] = row['interaction_identifier'] 
 
-    print('** {}'.format(len(secondary_interactions)))
     # Return dataframe with indirect interactions:        
     return pd.DataFrame({'uniprot_id': list(secondary_interactions.keys()), 
                        'Covid_indirect_interactions': list(secondary_interactions.values())})
@@ -245,9 +244,6 @@ if __name__ == '__main__':
     # Get indirect interactors:
     print('[Info] Generating table with indirect interactors of COVID proteins...')
     indirect_interactions_df = get_second_level_interactions(indirect_interactions_list, human_interactions_df)
-    print(len(human_interactions_df))
-    print(len(indirect_interactions_list))
-    print(len(indirect_interactions_df))
 
     # Mark any human proteins implicated in viral pathogenesis:
     print('[Info] Generating table with human proteins implicated in viral infection...')
