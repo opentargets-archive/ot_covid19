@@ -29,6 +29,9 @@ COVIDCOMPLEXURL=http://ftp.ebi.ac.uk/pub/databases/IntAct/complex/current/comple
 # IntAct COVID related interaction query:
 INTACTCOVIDURL="https://www.ebi.ac.uk/intact/export?format=mitab_27&query=annot%3A%22dataset%3ACoronavirus%22&negative=false&spoke=false&ontology=false&sort=intact-miscore&asc=false"
 
+# Full human intact data:
+INTACTHUMANURL='ftp://ftp.ebi.ac.uk/pub/databases/intact/various/ot_graphdb/2020-03-30/data/protein_pair_interactions.json'
+
 # HPA
 HPAURL=https://www.proteinatlas.org/download/proteinatlas.json.gz
 
@@ -94,6 +97,7 @@ CHEMBLMOA=$(RAWDIR)/chembl_mechanisms.json
 ## Interactions
 COVIDCOMPLEX=$(RAWDIR)/complex_sars-cov-2.tsv
 INTACTCOVID=$(RAWDIR)/IntAct_SARS-COV-2_interactions.tsv
+INTACTHUMAN=$(RAWDIR)/IntAct_homo_sapiens.json
 ## Baseline/Protein Expression
 HPA=$(RAWDIR)/hpa.json
 
@@ -112,7 +116,7 @@ OTTRACTABILITYPARSED=$(PREFORMATEDDIR)/targets/ot_tractability_parsed.tsv
 ENSEMBLPARSED=$(PARSEDDIR)/ensembl_parsed.json.gz
 ## Interactions
 COVIDCOMPLEXPARSED=$(PARSEDDIR)/complex_sars-cov-2_parsed.tsv
-INTACTCOVIDPARSED=$(PREFORMATEDDIR)/IntAct_SARS-COV-2_interactions_parsed.tsv
+INTACTCOVIDPARSED=$(PREFORMATEDDIR)/targets/IntAct_SARS-COV-2_interactions_parsed.tsv
 ## HPA
 HPAPREFORMATTED=$(PREFORMATEDDIR)/targets/hpa_parsed.tsv
 ## Drug info for target
@@ -149,7 +153,7 @@ setup-environment:
 downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTKNOWNTARGETSAFETY) $(OTEXPERIMENTALTOXICITY) \
 	$(OTBASELINE) $(OTBASELINETISSUEMAP) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) \
 	$(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) \
-	$(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL) $(HPA)
+	$(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL) $(HPA) $(INTACTHUMAN)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) \
@@ -226,6 +230,9 @@ $(COVIDCOMPLEX):
 $(INTACTCOVID):
 	$(CURL) $(INTACTCOVIDURL) > $@
 
+$(INTACTHUMAN):
+	$(CURL) $(INTACTHUMANURL) > $@	
+
 $(HPA):
 	$(CURL) $(HPAURL) | $(GUNZIP) -c | $(JQ) -r '.[] | @json' > $@
 
@@ -248,8 +255,8 @@ $(COMPLEXPREFORMATTED): $(COVIDCOMPLEX) $(COVIDCOMPLEXPARSED)
 $(ENSEMBLPARSED): $(COVIDCOMPLEX)
 	$(PIPENV) run python $(SRCDIR)/parsers/ensembl_parser.py -i $(ENSEMBL) -o $(ENSEMBLPARSED)
 
-$(INTACTCOVIDPARSED): $(INTACTCOVID) $(UNIPROTIDMAPPING)
-	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $(INTACTCOVIDPARSED) -m  $(UNIPROTIDMAPPING)
+$(INTACTCOVIDPARSED): $(INTACTCOVID) $(UNIPROTIDMAPPING) $(INTACTHUMAN)
+	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $(INTACTCOVIDPARSED) -m  $(UNIPROTIDMAPPING) -f $(INTACTHUMAN)
 
 $(OTBASELINEPARSED): $(OTBASELINE) $(OTBASELINETISSUEMAP)
 	$(PIPENV) run python $(SRCDIR)/parsers/baseline_parser.py -i $(OTBASELINE) -m $(OTBASELINETISSUEMAP) -o $(OTBASELINEPARSED)
