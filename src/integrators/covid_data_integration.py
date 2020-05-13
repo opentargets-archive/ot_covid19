@@ -160,7 +160,7 @@ class TargetDataIntegrator(object):
         ## Filter No1: Any of the networks OR uniprot implicated.
         ##
         integrated_df['FILTER_network'] =  (
-            integrated_df['COVID-19 UniprotKB'] | 
+            (integrated_df['COVID-19 UniprotKB']) | 
             (~ integrated_df['COVID_complex_names'].isna()) | 
             (~ integrated_df['Covid_direct_interactions'].isna()) | 
             (~ integrated_df['Covid_indirect_interactions'].isna()) | 
@@ -172,8 +172,8 @@ class TargetDataIntegrator(object):
         ## Filter No2: Any networks AND Phase3 or 4 trial
         ##
         integrated_df['FILTER_network+drug'] = (
-            integrated_df['FILTER_network'] &
-            integrated_df['max_phase'] > 2
+            (integrated_df['FILTER_network']) &
+            (integrated_df['max_phase'] > 2)
         )
 
         # Update dataframe:
