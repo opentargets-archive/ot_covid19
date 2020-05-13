@@ -161,11 +161,18 @@ def read_human_interactions(human_interactions_file):
     with open(human_interactions_file,'r') as f:
         for line in f:
             interaction = json.loads(line)
-            all_human_interactions.append({
-                'interactor_a':interaction['interactorA_uniprot_name'].split('-')[0],
-                'interactor_b':interaction['interactorB_uniprot_name'].split('-')[0],
-                'interaction_identifier': interaction['interaction_identifier']
-            })
+
+            if interaction["mi_score"] is None:
+                continue
+
+            # Applying MI score threshold for interactions:
+            if interaction["mi_score"] > .45:
+
+                all_human_interactions.append({
+                    'interactor_a':interaction['interactorA_uniprot_name'].split('-')[0],
+                    'interactor_b':interaction['interactorB_uniprot_name'].split('-')[0],
+                    'interaction_identifier': interaction['interaction_identifier']
+                })
 
     # return dataframe with all human interactions (~520k)
     return pd.DataFrame(all_human_interactions)
