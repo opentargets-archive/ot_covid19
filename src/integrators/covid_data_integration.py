@@ -153,6 +153,32 @@ class TargetDataIntegrator(object):
         # Update:
         self.ensembl_df = merged
 
+    def add_filter_columns(self):
+        integrated_df = self.ensembl_df
+
+        ##
+        ## Filter No1: Any of the networks OR uniprot implicated.
+        ##
+        integrated_df['FILTER_network'] =  (
+            (integrated_df['COVID-19 UniprotKB']) | 
+            (~ integrated_df['COVID_complex_names'].isna()) | 
+            (~ integrated_df['Covid_direct_interactions'].isna()) | 
+            (~ integrated_df['Covid_indirect_interactions'].isna()) | 
+            (integrated_df['Implicated_in_viral_infection'] == True)
+        )
+
+
+        ##
+        ## Filter No2: Any networks AND Phase3 or 4 trial
+        ##
+        integrated_df['FILTER_network+drug'] = (
+            (integrated_df['FILTER_network']) &
+            (integrated_df['max_phase'] > 2)
+        )
+
+        # Update dataframe:
+        self.ensembl_df = integrated_df
+
 
 class DrugDataIntegrator(object):
 
@@ -248,9 +274,10 @@ def main():
         # Integrating:
         integrator_obj.add_data(data_df, parameters)
 
-    # Map taxonomy to species:
+    # Map taxonomy to species and apply filters:
     if entity_type == "targets":
         integrator_obj.map_taxonomy()
+        integrator_obj.add_filter_columns()
 
     # Save data:
     integrator_obj.save_integrated(output_file)
