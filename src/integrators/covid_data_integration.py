@@ -129,10 +129,15 @@ class TargetDataIntegrator(object):
     
     
     def save_integrated(self, file_name='test.tsv'):
+        integrated = self.ensembl_df
+
+        # Dropping columns:
+        integrated.drop(['id', 'MIM_morbidity','COVID_complex_names'], axis=1, inplace=True)
+
         if '.tsv' in file_name:
-            self.ensembl_df.to_csv(file_name, sep='\t', index=False)
+            integrated.to_csv(file_name, sep='\t', index=False)
         if '.xlsx' in file_name:
-            self.ensembl_df.to_excel(file_name, index=False)
+            integrated.to_excel(file_name, index=False)
 
 
     def map_taxonomy(self):
