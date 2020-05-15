@@ -55,6 +55,8 @@ GUNZIP ?= $(shell which gunzip)
 JQ ?= $(shell which jq)
 SED ?= $(shell which sed)
 PIPENV ?= $(shell which pipenv)
+R ?= $(shell which R)
+RSCRIPT ?= $(shell which Rscript)
 
 #################################
 # Paths (DIRECTORIES)
@@ -148,6 +150,7 @@ clean-all:
 ## Setup environment
 setup-environment:
 	$(PIPENV) install
+	$(R) -e 'renv::restore()'
 
 ## Downlad files
 downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTKNOWNTARGETSAFETY) $(OTEXPERIMENTALTOXICITY) \
