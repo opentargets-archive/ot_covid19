@@ -1,6 +1,7 @@
 import json
 import gzip
 import argparse
+import pandas as pd
 
 def parsing_ensembl_json(data):
     """
@@ -58,7 +59,7 @@ def main():
 
     parser.add_argument('-i', '--input', help='Ensembl JSON input file name.', required=True, type=str)
     parser.add_argument('-o', '--output', help='Output file name.', required=True, type=str)
-    parser.add_argument('-m', '--mappingFile', help='Name of output UniProt to Ensembl id mapping file', type=str, default='uniprot2ensembl.json')
+    parser.add_argument('-m', '--mappingFile', help='Name of output UniProt to Ensembl id mapping file', type=str, default='uniprot2ensembl.tsv')
 
     args = parser.parse_args()
 
@@ -98,9 +99,9 @@ def main():
                 
     output_file_handle.close()
 
-    # Save UniProt to Ensembl  mapping
-    with open(mapping_file, 'w') as m:
-        json.dump(uniprot2ensembl_map, m)
+    # Save UniProt to Ensembl  mapping as a tsv
+    uniprot2ensembl_series = pd.Series(uniprot2ensembl_map, name="ensembl_id").explode()
+    pd.DataFrame(uniprot2ensembl_series).to_csv(mapping_file, sep='\t', header=False)
 
 
 
