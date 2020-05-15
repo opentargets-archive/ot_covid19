@@ -114,6 +114,8 @@ OTSAFETYPARSED=$(PREFORMATEDDIR)/targets/ot_target_safety.tsv
 OTTRACTABILITYPARSED=$(PREFORMATEDDIR)/targets/ot_tractability_parsed.tsv
 ## Ensembl
 ENSEMBLPARSED=$(PARSEDDIR)/ensembl_parsed.json.gz
+## UniProt id to Ensembl mapping
+UNIPROT2ENSEMBL=$(PARSEDDIR)/uniprot2ensembl.json
 ## Interactions
 COVIDCOMPLEXPARSED=$(PARSEDDIR)/complex_sars-cov-2_parsed.tsv
 INTACTCOVIDPARSED=$(PREFORMATEDDIR)/targets/IntAct_SARS-COV-2_interactions_parsed.tsv
@@ -253,7 +255,7 @@ $(COMPLEXPREFORMATTED): $(COVIDCOMPLEX) $(COVIDCOMPLEXPARSED)
 	$(PIPENV) run python $(SRCDIR)/parsers/complex_portal_parser.py -i $(COVIDCOMPLEXPARSED) -o $(COMPLEXPREFORMATTED)
 
 $(ENSEMBLPARSED): $(COVIDCOMPLEX)
-	$(PIPENV) run python $(SRCDIR)/parsers/ensembl_parser.py -i $(ENSEMBL) -o $(ENSEMBLPARSED)
+	$(PIPENV) run python $(SRCDIR)/parsers/ensembl_parser.py -i $(ENSEMBL) -o $(ENSEMBLPARSED) -m $(UNIPROT2ENSEMBL)
 
 $(INTACTCOVIDPARSED): $(INTACTCOVID) $(UNIPROTIDMAPPING) $(INTACTHUMAN)
 	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $(INTACTCOVIDPARSED) -m  $(UNIPROTIDMAPPING) -f $(INTACTHUMAN)

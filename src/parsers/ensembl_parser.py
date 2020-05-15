@@ -1,6 +1,7 @@
 import json
 import gzip
 import argparse
+import pandas as pd
 
 def parsing_ensembl_json(data):
     """
@@ -54,20 +55,24 @@ def get_MIM_morbidity(xrefs):
 def main():
     
     # Parse command line arguments
-    parser = argparse.ArgumentParser()
     parser = argparse.ArgumentParser(description='Parse information from Ensembl json export and saves as gzipped json.')
 
     parser.add_argument('-i', '--input', help='Ensembl JSON input file name.', required=True, type=str)
     parser.add_argument('-o', '--output', help='Output file name.', required=True, type=str)
+    parser.add_argument('-m', '--mappingFile', help='Name of output UniProt to Ensembl id mapping file', type=str, default='uniprot2ensembl.tsv')
 
     args = parser.parse_args()
 
     # Get parameters:
     input_file = args.input
     output_file = args.output
+    mapping_file = args.mappingFile
 
     # Open output gzip file.
     output_file_handle = gzip.open(output_file, 'wt')
+
+    # Dictionary to store UniProt id to Ensembl mapping
+    uniprot2ensembl_map = {}
 
     # OPen and looping through all ensembl genes:
     with open(input_file, 'r') as i:
@@ -81,11 +86,22 @@ def main():
                 
                 # Save parsed field:
                 output_file_handle.write(json.dumps(parsed_data)+'\n')
+
+                # Add UniProt mappings for current gene
+                for protein in parsed_data['uniprot_ids']:
+                    if protein in uniprot2ensembl_map:
+                        uniprot2ensembl_map[protein].append(parsed_data['ensembl_id'])
+                    else:
+                        uniprot2ensembl_map[protein] = [parsed_data['ensembl_id']]
                 
             except:
                 raise
                 
     output_file_handle.close()
+
+    # Save UniProt to Ensembl  mapping as a tsv
+    uniprot2ensembl_df = pd.DataFrame.from_dict({'uniprot_id': list(uniprot2ensembl_map.keys()), 'ensembl_id': list(uniprot2ensembl_map.values())}, orient='columns').explode('ensembl_id')
+    uniprot2ensembl_df.to_csv(mapping_file, sep='\t', header=True, index=False)
 
 
 
