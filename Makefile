@@ -35,13 +35,6 @@ INTACTHUMANURL='ftp://ftp.ebi.ac.uk/pub/databases/intact/various/ot_graphdb/2020
 # HPA
 HPAURL=https://www.proteinatlas.org/download/proteinatlas.json.gz
 
-# Drug ChEMBL
-CHEMBLMOLECULEURL=https://www.ebi.ac.uk/chembl/api/data/molecule.json
-CHEMBLDRUGINDICATIONURL=https://www.ebi.ac.uk/chembl/api/data/drug_indication.json
-CHEMBLTARGETSURL=https://www.ebi.ac.uk/chembl/api/data/target.json
-CHEMBLTARGETCOMPONENTSURL=https://www.ebi.ac.uk/chembl/api/data/target_component.json
-CHEMBLMOAURL=https://www.ebi.ac.uk/chembl/api/data/mechanism.json
-
 ## Wikidata server
 WIKIDATASERVER=https://query.wikidata.org/bigdata/namespace/wdq/sparql
 
@@ -91,11 +84,6 @@ OTBASELINETISSUEMAP=$(RAWDIR)/ot_map_with_efos.json
 OTEVIDENCE=$(RAWDIR)/ot_evidence.json
 ## Drugs
 WIKIDATATRIALS=$(RAWDIR)/wiki_trials.tsv
-CHEMBLMOLECULE=$(RAWDIR)/chembl_molecules.json
-CHEMBLDRUGINDICATION=$(RAWDIR)/chembl_indication.json
-CHEMBLTARGETS=$(RAWDIR)/chembl_targets.json
-CHEMBLTARGETCOMPONENTS=$(RAWDIR)/chembl_target_components.json
-CHEMBLMOA=$(RAWDIR)/chembl_mechanisms.json
 ## Interactions
 COVIDCOMPLEX=$(RAWDIR)/complex_sars-cov-2.tsv
 INTACTCOVID=$(RAWDIR)/IntAct_SARS-COV-2_interactions.tsv
@@ -158,8 +146,7 @@ setup-environment:
 ## Downlad files
 downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTKNOWNTARGETSAFETY) $(OTEXPERIMENTALTOXICITY) \
 	$(OTBASELINE) $(OTBASELINETISSUEMAP) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) \
-	$(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) \
-	$(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL) $(HPA) $(INTACTHUMAN)
+	$(WIKIDATATRIALS) $(ENSEMBL) $(HPA) $(INTACTHUMAN)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) \
