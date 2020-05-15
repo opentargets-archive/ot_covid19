@@ -102,6 +102,8 @@ INTACTCOVID=$(RAWDIR)/IntAct_SARS-COV-2_interactions.tsv
 INTACTHUMAN=$(RAWDIR)/IntAct_homo_sapiens.json
 ## Baseline/Protein Expression
 HPA=$(RAWDIR)/hpa.json
+## Protein Abundance in covid
+COVIDABUNDACESRAW=$(DATADIR)/bojkova_et_al_nature_covid_abundances.csv
 
 ######################################################
 # PARSED FILES - Files with some intermediate parsing
@@ -130,14 +132,13 @@ DRUGSPARSED=$(PARSEDDIR)/drug_info.tsv
 ## Toy table of drugs in clinical trials for COVID-19
 DRUGSCOVID19TRIALSPARSED=$(PREFORMATEDDIR)/drugs/covid19_ct_test.tsv
 
-###############################################################
-# PREFORMATED FILES - Files already formatted to be integrated
-###############################################################
-
 COMPLEXPREFORMATTED=$(PREFORMATEDDIR)/targets/complex_portal_preformatted.tsv
+
+COVIDABUNDANCES=$(PREFORMATEDDIR)/targets/covid_abundances.tsv
+
+
 TARGETSINTEGRATED=$(RESULTDIR)/targets_integrated_data.tsv
 DRUGSINTEGRATED=$(RESULTDIR)/drugs_integrated_data.tsv
-
 #############################################################################
 
 #### Phony targets
@@ -163,7 +164,7 @@ downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABIL
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) \
 		$(ENSEMBLPARSED) $(OTBASELINEPARSED) $(HPAPREFORMATTED) $(DRUGFORTARGETPARSED) \
-		$(OTTRACTABILITYPARSED) $(OTSAFETYPARSED) $(COMPLEXPREFORMATTED) $(DRUGSPARSED) $(DRUGSCOVID19TRIALSPARSED)
+		$(OTTRACTABILITYPARSED) $(OTSAFETYPARSED) $(COMPLEXPREFORMATTED) $(DRUGSPARSED) $(DRUGSCOVID19TRIALSPARSED) $(COVIDABUNDANCES)
 
 # CREATES TEMPORARY DIRECTORY
 create-temp:
@@ -283,6 +284,9 @@ $(DRUGSPARSED): $(OTDRUGEVIDENCE)
 
 $(DRUGSCOVID19TRIALSPARSED): $(OTDRUGEVIDENCE)
 	$(PIPENV) run python $(SRCDIR)/parsers/target_druginfo_parser.py -i $(OTDRUGEVIDENCE) -o $@ -e covid19_trials
+
+$(COVIDABUNDANCES): $(UNIPROT2ENSEMBL)
+	$(RSCRIPT) $(SRCDIR)/parsers/abundances_get.R $(COVIDABUNDACESRAW) $(UNIPROT2ENSEMBL) $@
 
 ##
 ## Integrate files:
