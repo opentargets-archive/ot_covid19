@@ -50,12 +50,15 @@ class TargetActiveCompounds():
         # Read activity file and extract info
         activity_df = pd.read_csv(activity_file, sep='\t', header=0, index_col=0)
         for uniprot_id, info in activity_df.iterrows():
-            for gene in self.target_uniprot2ensembl_map[uniprot_id]:
-                if gene in self.target_compound_activity_info:
-                    self.target_compound_activity_info[gene]['active_invitro_drugs'].append(info['molecule_chembl_id'])
-                else:
-                    self.target_compound_activity_info[gene] = { 'active_drug_covid_invitro_assay': True,
-                                                                 'active_invitro_drugs': [info['molecule_chembl_id']]}
+            try:
+                for gene in self.target_uniprot2ensembl_map[uniprot_id]:
+                    if gene in self.target_compound_activity_info:
+                        self.target_compound_activity_info[gene]['active_invitro_drugs'].append(info['molecule_chembl_id'])
+                    else:
+                        self.target_compound_activity_info[gene] = { 'active_drug_covid_invitro_assay': True,
+                                                                     'active_invitro_drugs': [info['molecule_chembl_id']]}
+            except KeyError:
+                self._logger.info("Could not map {} to Ensembl, skipping it".format(uniprot_id))
 
         self._logger.info("Activity info parsed for {} targets".format(len(self.target_compound_activity_info)))
         # Write to tsv file
