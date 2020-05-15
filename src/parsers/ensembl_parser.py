@@ -54,7 +54,6 @@ def get_MIM_morbidity(xrefs):
 def main():
     
     # Parse command line arguments
-    parser = argparse.ArgumentParser()
     parser = argparse.ArgumentParser(description='Parse information from Ensembl json export and saves as gzipped json.')
 
     parser.add_argument('-i', '--input', help='Ensembl JSON input file name.', required=True, type=str)
