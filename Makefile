@@ -55,6 +55,8 @@ GUNZIP ?= $(shell which gunzip)
 JQ ?= $(shell which jq)
 SED ?= $(shell which sed)
 PIPENV ?= $(shell which pipenv)
+R ?= $(shell which R)
+RSCRIPT ?= $(shell which Rscript)
 
 #################################
 # Paths (DIRECTORIES)
@@ -100,6 +102,8 @@ INTACTCOVID=$(RAWDIR)/IntAct_SARS-COV-2_interactions.tsv
 INTACTHUMAN=$(RAWDIR)/IntAct_homo_sapiens.json
 ## Baseline/Protein Expression
 HPA=$(RAWDIR)/hpa.json
+## Protein Abundance in covid
+COVIDABUNDACESRAW=$(DATADIR)/bojkova_et_al_nature_covid_abundances.csv
 
 ######################################################
 # PARSED FILES - Files with some intermediate parsing
@@ -129,14 +133,13 @@ DRUGSPARSED=$(PARSEDDIR)/drug_info.tsv
 ## Toy table of drugs in clinical trials for COVID-19
 DRUGSCOVID19TRIALSPARSED=$(PREFORMATEDDIR)/drugs/covid19_ct_test.tsv
 
-###############################################################
-# PREFORMATED FILES - Files already formatted to be integrated
-###############################################################
-
 COMPLEXPREFORMATTED=$(PREFORMATEDDIR)/targets/complex_portal_preformatted.tsv
+
+COVIDABUNDANCES=$(PREFORMATEDDIR)/targets/covid_abundances.tsv
+
+
 TARGETSINTEGRATED=$(RESULTDIR)/targets_integrated_data.tsv
 DRUGSINTEGRATED=$(RESULTDIR)/drugs_integrated_data.tsv
-
 #############################################################################
 
 #### Phony targets
@@ -151,6 +154,7 @@ clean-all:
 ## Setup environment
 setup-environment:
 	$(PIPENV) install
+	$(R) -e 'renv::restore()'
 
 ## Downlad files
 downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTKNOWNTARGETSAFETY) $(OTEXPERIMENTALTOXICITY) \
@@ -162,7 +166,8 @@ downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABIL
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) \
 		$(ENSEMBLPARSED) $(OTBASELINEPARSED) $(HPAPREFORMATTED) $(DRUGFORTARGETPARSED) \
 		$(OTTRACTABILITYPARSED) $(OTSAFETYPARSED) $(COMPLEXPREFORMATTED) $(DRUGSPARSED) $(DRUGSCOVID19TRIALSPARSED) \
-		$(UNIPROT2ENSEMBL)
+		$(UNIPROT2ENSEMBL) $(COVIDABUNDANCES)
+
 
 # CREATES TEMPORARY DIRECTORY
 create-temp:
@@ -255,14 +260,14 @@ $(COVIDCOMPLEXPARSED): $(COVIDCOMPLEX)
 $(COMPLEXPREFORMATTED): $(COVIDCOMPLEX) $(COVIDCOMPLEXPARSED)
 	$(PIPENV) run python $(SRCDIR)/parsers/complex_portal_parser.py -i $(COVIDCOMPLEXPARSED) -o $(COMPLEXPREFORMATTED)
 
-$(ENSEMBLPARSED): $(COVIDCOMPLEX)
+$(ENSEMBLPARSED) $(UNIPROT2ENSEMBLDRAFT): $(ENSEMBL)
 	$(PIPENV) run python $(SRCDIR)/parsers/ensembl_parser.py -i $(ENSEMBL) -o $(ENSEMBLPARSED) -m $(UNIPROT2ENSEMBLDRAFT)
 
 $(INTACTCOVIDPARSED): $(INTACTCOVID) $(UNIPROTIDMAPPING) $(INTACTHUMAN)
-	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $(INTACTCOVIDPARSED) -m  $(UNIPROTIDMAPPING) -f $(INTACTHUMAN)
+	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $@ -m  $(UNIPROTIDMAPPING) -f $(INTACTHUMAN)
 
 $(OTBASELINEPARSED): $(OTBASELINE) $(OTBASELINETISSUEMAP)
-	$(PIPENV) run python $(SRCDIR)/parsers/baseline_parser.py -i $(OTBASELINE) -m $(OTBASELINETISSUEMAP) -o $(OTBASELINEPARSED)
+	$(PIPENV) run python $(SRCDIR)/parsers/baseline_parser.py -i $(OTBASELINE) -m $(OTBASELINETISSUEMAP) -o $@
 
 $(HPAPREFORMATTED): $(HPA)
 	$(PIPENV) run python $(SRCDIR)/parsers/hpa_parser.py -i $(HPA) -o $@
@@ -283,7 +288,11 @@ $(DRUGSCOVID19TRIALSPARSED): $(OTDRUGEVIDENCE)
 	$(PIPENV) run python $(SRCDIR)/parsers/target_druginfo_parser.py -i $(OTDRUGEVIDENCE) -o $@ -e covid19_trials
 
 $(UNIPROT2ENSEMBL): $(ENSEMBLPARSED) $(UNIPROTIDMAPPING)
-	$(PIPENV) run python $(SRCDIR)/parsers/Ensembl-Uniprot_map_generator.py -u $(UNIPROTIDMAPPING) -e $(UNIPROT2ENSEMBLDRAFT) -o $(UNIPROT2ENSEMBL)
+	$(PIPENV) run python $(SRCDIR)/parsers/Ensembl-Uniprot_map_generator.py -u $(UNIPROTIDMAPPING) -e $(UNIPROT2ENSEMBLDRAFT) -o $@
+
+$(COVIDABUNDANCES): $(UNIPROT2ENSEMBL)
+	$(RSCRIPT) $(SRCDIR)/parsers/abundances_get.R $(COVIDABUNDACESRAW) $(UNIPROT2ENSEMBL) $@
+
 
 ##
 ## Integrate files:
