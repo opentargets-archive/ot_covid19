@@ -1,4 +1,4 @@
-library(tidyverse)
+suppressPackageStartupMessages(library(tidyverse))
 
 args <- commandArgs(trailingOnly = TRUE)
 inputFile <- args[1]
@@ -8,9 +8,8 @@ outputFile <- args[3]
 pvalue_cutoff <- 0.01 ## Constant
 
 
-map <- read_tsv(mappingsFile)
-
-df <- read_csv(file = inputFile, comment = "")
+map <- read_tsv(mappingsFile, col_types = cols())
+df <- read_csv(file = inputFile, comment = "", col_types = cols())
 
 ## reading, renaming, grouping, summarise
 out <- df %>%

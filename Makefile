@@ -35,13 +35,6 @@ INTACTHUMANURL='ftp://ftp.ebi.ac.uk/pub/databases/intact/various/ot_graphdb/2020
 # HPA
 HPAURL=https://www.proteinatlas.org/download/proteinatlas.json.gz
 
-# Drug ChEMBL
-CHEMBLMOLECULEURL=https://www.ebi.ac.uk/chembl/api/data/molecule.json
-CHEMBLDRUGINDICATIONURL=https://www.ebi.ac.uk/chembl/api/data/drug_indication.json
-CHEMBLTARGETSURL=https://www.ebi.ac.uk/chembl/api/data/target.json
-CHEMBLTARGETCOMPONENTSURL=https://www.ebi.ac.uk/chembl/api/data/target_component.json
-CHEMBLMOAURL=https://www.ebi.ac.uk/chembl/api/data/mechanism.json
-
 ## Wikidata server
 WIKIDATASERVER=https://query.wikidata.org/bigdata/namespace/wdq/sparql
 
@@ -91,11 +84,6 @@ OTBASELINETISSUEMAP=$(RAWDIR)/ot_map_with_efos.json
 OTEVIDENCE=$(RAWDIR)/ot_evidence.json
 ## Drugs
 WIKIDATATRIALS=$(RAWDIR)/wiki_trials.tsv
-CHEMBLMOLECULE=$(RAWDIR)/chembl_molecules.json
-CHEMBLDRUGINDICATION=$(RAWDIR)/chembl_indication.json
-CHEMBLTARGETS=$(RAWDIR)/chembl_targets.json
-CHEMBLTARGETCOMPONENTS=$(RAWDIR)/chembl_target_components.json
-CHEMBLMOA=$(RAWDIR)/chembl_mechanisms.json
 ## Interactions
 COVIDCOMPLEX=$(RAWDIR)/complex_sars-cov-2.tsv
 INTACTCOVID=$(RAWDIR)/IntAct_SARS-COV-2_interactions.tsv
@@ -104,6 +92,9 @@ INTACTHUMAN=$(RAWDIR)/IntAct_homo_sapiens.json
 HPA=$(RAWDIR)/hpa.json
 ## Protein Abundance in covid
 COVIDABUNDACESRAW=$(DATADIR)/bojkova_et_al_nature_covid_abundances.csv
+## covid-drugs data (from ChEMBL-Aldo)
+DRUGFILE=$(DATADIR)/table_final_drugs_covid.txt
+ACTIVES_MOA_FILE=$(DATADIR)/actives_covid_table_moa.txt
 
 ######################################################
 # PARSED FILES - Files with some intermediate parsing
@@ -132,12 +123,15 @@ DRUGFORTARGETPARSED=$(PREFORMATEDDIR)/targets/drug_fortarget_parsed.tsv
 DRUGSPARSED=$(PARSEDDIR)/drug_info.tsv
 ## Toy table of drugs in clinical trials for COVID-19
 DRUGSCOVID19TRIALSPARSED=$(PREFORMATEDDIR)/drugs/covid19_ct_test.tsv
-
+## complex portal information
 COMPLEXPREFORMATTED=$(PREFORMATEDDIR)/targets/complex_portal_preformatted.tsv
-
+## covid-induced protein abundances
 COVIDABUNDANCES=$(PREFORMATEDDIR)/targets/covid_abundances.tsv
+## covid-related drug data
+COVID_TARGET_TRIALS=$(PREFORMATEDDIR)/targets/covid_target_trials.tsv
+COVID_TARGET_INVITRO=$(PREFORMATEDDIR)/targets/covid_target_invitro.tsv
 
-
+## integrated tables
 TARGETSINTEGRATED=$(RESULTDIR)/targets_integrated_data.tsv
 DRUGSINTEGRATED=$(RESULTDIR)/drugs_integrated_data.tsv
 #############################################################################
@@ -154,19 +148,18 @@ clean-all:
 ## Setup environment
 setup-environment:
 	$(PIPENV) install
-	$(R) -e 'renv::restore()'
+	$(R) -q -e 'ifelse(file.exists("renv/library"), renv::restore(), renv::init())'
 
 ## Downlad files
 downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTKNOWNTARGETSAFETY) $(OTEXPERIMENTALTOXICITY) \
 	$(OTBASELINE) $(OTBASELINETISSUEMAP) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) \
-	$(WIKIDATATRIALS) $(CHEMBLMOLECULE) $(CHEMBLDRUGINDICATION) $(CHEMBLTARGETCOMPONENTS) \
-	$(CHEMBLTARGETS) $(CHEMBLMOA) $(ENSEMBL) $(HPA) $(INTACTHUMAN)
+	$(WIKIDATATRIALS) $(ENSEMBL) $(HPA) $(INTACTHUMAN)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) \
 		$(ENSEMBLPARSED) $(OTBASELINEPARSED) $(HPAPREFORMATTED) $(DRUGFORTARGETPARSED) \
 		$(OTTRACTABILITYPARSED) $(OTSAFETYPARSED) $(COMPLEXPREFORMATTED) $(DRUGSPARSED) $(DRUGSCOVID19TRIALSPARSED) \
-		$(UNIPROT2ENSEMBL) $(COVIDABUNDANCES)
+		$(UNIPROT2ENSEMBL) $(COVIDABUNDANCES) $(COVIDABUNDANCES) $(COVID_TARGET_TRIALS) $(COVID_TARGET_INVITRO)
 
 
 # CREATES TEMPORARY DIRECTORY
@@ -291,7 +284,16 @@ $(UNIPROT2ENSEMBL): $(ENSEMBLPARSED) $(UNIPROTIDMAPPING)
 	$(PIPENV) run python $(SRCDIR)/parsers/Ensembl-Uniprot_map_generator.py -u $(UNIPROTIDMAPPING) -e $(UNIPROT2ENSEMBLDRAFT) -o $@
 
 $(COVIDABUNDANCES): $(UNIPROT2ENSEMBL)
-	$(RSCRIPT) $(SRCDIR)/parsers/abundances_get.R $(COVIDABUNDACESRAW) $(UNIPROT2ENSEMBL) $@
+	$(RSCRIPT) $(SRCDIR)/parsers/abundances_get.R $(COVIDABUNDACESRAW) $(UNIPROT2ENSEMBL) $@ 2>&1 >/dev/null
+
+$(COVID_TARGET_TRIALS) $(COVID_TARGET_INVITRO): $(UNIPROT2ENSEMBL)
+	$(RSCRIPT) $(SRCDIR)/parsers/covid_trials.R \
+	$(UNIPROT2ENSEMBL) \
+	$(DRUGFILE) \
+	$(ACTIVES_MOA_FILE) \
+	$(COVID_TARGET_TRIALS) \
+	$(COVID_TARGET_INVITRO) 2>&1 >/dev/null
+
 
 
 ##
