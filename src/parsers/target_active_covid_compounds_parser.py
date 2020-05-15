@@ -31,15 +31,14 @@ class TargetActiveCompounds():
     def get_uniprot2ensembl_mappings(self, filename):
         """Return a dictionary that maps UniProt ids to Ensembl ids"""
 
-        # Load UniProt mapping file an iterate through every protein
-        id_map_df = pd.read_csv(filename, sep='\t', names=['uniprot', 'source', 'id'])
-        id_map_df = id_map_df.loc[id_map_df.source == 'Ensembl']
+        # Load UniProt to Ensembl mapping file an iterate through every protein
+        id_map_df = pd.read_csv(filename, sep='\t', header=0)
 
         for index, row in id_map_df.iterrows():
-            if row['uniprot'] in self.target_uniprot2ensembl_map:
-                self.target_uniprot2ensembl_map[row['uniprot']].append(row['id'])
+            if row['uniprot_id'] in self.target_uniprot2ensembl_map:
+                self.target_uniprot2ensembl_map[row['uniprot_id']].append(row['ensembl_id'])
             else:
-                self.target_uniprot2ensembl_map[row['uniprot']] = [row['id']]
+                self.target_uniprot2ensembl_map[row['uniprot_id']] = [row['ensembl_id']]
 
         self._logger.info("{} UniProt ids mapped to Ensembl".format(len(self.target_uniprot2ensembl_map)))
 
@@ -73,7 +72,7 @@ def main():
                         type=str, default='actives_covid_table_final.txt')
 
     parser.add_argument('-m', '--mappingFile',
-                        help='Name of UniProt mapping file',
+                        help='Name of UniProt to Ensembl mapping file',
                         type=str, default='ensembl_parsed.json.gz')
 
     parser.add_argument('-o','--output',
