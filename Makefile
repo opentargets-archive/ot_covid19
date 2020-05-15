@@ -258,14 +258,17 @@ $(COVIDCOMPLEXPARSED): $(COVIDCOMPLEX)
 $(COMPLEXPREFORMATTED): $(COVIDCOMPLEX) $(COVIDCOMPLEXPARSED)
 	$(PIPENV) run python $(SRCDIR)/parsers/complex_portal_parser.py -i $(COVIDCOMPLEXPARSED) -o $(COMPLEXPREFORMATTED)
 
-$(ENSEMBLPARSED): $(COVIDCOMPLEX)
-	$(PIPENV) run python $(SRCDIR)/parsers/ensembl_parser.py -i $(ENSEMBL) -o $(ENSEMBLPARSED) -m $(UNIPROT2ENSEMBL)
+$(ENSEMBLPARSED): $(ENSEMBL)
+	$(PIPENV) run python $(SRCDIR)/parsers/ensembl_parser.py -i $(ENSEMBL) -o $@ -m $(UNIPROT2ENSEMBL)
+
+$(UNIPROT2ENSEMBL): $(ENSEMBL)
+	$(PIPENV) run python $(SRCDIR)/parsers/ensembl_parser.py -i $(ENSEMBL) -o $@ -m $(UNIPROT2ENSEMBL)
 
 $(INTACTCOVIDPARSED): $(INTACTCOVID) $(UNIPROTIDMAPPING) $(INTACTHUMAN)
-	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $(INTACTCOVIDPARSED) -m  $(UNIPROTIDMAPPING) -f $(INTACTHUMAN)
+	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $@ -m  $(UNIPROTIDMAPPING) -f $(INTACTHUMAN)
 
 $(OTBASELINEPARSED): $(OTBASELINE) $(OTBASELINETISSUEMAP)
-	$(PIPENV) run python $(SRCDIR)/parsers/baseline_parser.py -i $(OTBASELINE) -m $(OTBASELINETISSUEMAP) -o $(OTBASELINEPARSED)
+	$(PIPENV) run python $(SRCDIR)/parsers/baseline_parser.py -i $(OTBASELINE) -m $(OTBASELINETISSUEMAP) -o $@
 
 $(HPAPREFORMATTED): $(HPA)
 	$(PIPENV) run python $(SRCDIR)/parsers/hpa_parser.py -i $(HPA) -o $@
