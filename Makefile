@@ -117,7 +117,7 @@ OTTRACTABILITYPARSED=$(PREFORMATEDDIR)/targets/ot_tractability_parsed.tsv
 ## Ensembl
 ENSEMBLPARSED=$(PARSEDDIR)/ensembl_parsed.json.gz
 ## UniProt id to Ensembl mapping
-UNIPROT2ENSEMBL=$(PARSEDDIR)/uniprot2ensembl.json
+UNIPROT2ENSEMBL=$(PARSEDDIR)/uniprot2ensembl.tsv
 ## Interactions
 COVIDCOMPLEXPARSED=$(PARSEDDIR)/complex_sars-cov-2_parsed.tsv
 INTACTCOVIDPARSED=$(PREFORMATEDDIR)/targets/IntAct_SARS-COV-2_interactions_parsed.tsv
