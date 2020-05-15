@@ -100,8 +100,8 @@ def main():
     output_file_handle.close()
 
     # Save UniProt to Ensembl  mapping as a tsv
-    uniprot2ensembl_series = pd.Series(uniprot2ensembl_map, name="ensembl_id").explode()
-    pd.DataFrame(uniprot2ensembl_series).to_csv(mapping_file, sep='\t', header=False)
+    uniprot2ensembl_df = pd.DataFrame.from_dict({'uniprot_id': list(uniprot2ensembl_map.keys()), 'ensembl_id': list(uniprot2ensembl_map.values())}, orient='columns').explode('ensembl_id')
+    uniprot2ensembl_df.to_csv(mapping_file, sep='\t', header=True, index=False)
 
 
 
