@@ -153,7 +153,7 @@ clean-all:
 ## Setup environment
 setup-environment:
 	$(PIPENV) install
-	$(R) -e 'renv::restore()'
+	$(R) -q -e 'ifelse(file.exists("renv/library"), renv::restore(), renv::init())'
 
 ## Downlad files
 downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTKNOWNTARGETSAFETY) $(OTEXPERIMENTALTOXICITY) \
