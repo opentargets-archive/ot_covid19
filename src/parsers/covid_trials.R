@@ -3,20 +3,20 @@ suppressPackageStartupMessages(library(tidyverse))
 args <- commandArgs(trailingOnly = TRUE)
 mappingsFile <- args[1]
 drugFile <- args[2]
-actives_moa_File <- args[3]
+moa_File <- args[3]
 covid_trials_output <- args[4]
 covid_invitro_output <- args[5]
 
 # read files
 map <- read_tsv(mappingsFile, col_types = cols())
 drug <- read_tsv(drugFile, col_types = cols())
-actives_moa <- read_tsv(actives_moa_File, col_types = cols())
+moa <- read_tsv(moa_File, col_types = cols())
 
 ## covid clinical trials
 covid_trials <- drug %>%
     select(molecule_chembl_id, IN_TRIALS, PREF_NAME) %>%
     filter(IN_TRIALS == 1) %>%
-    inner_join(actives_moa %>%
+    inner_join(moa %>%
                select(molecule_chembl_id, uniprot_id),
                by = c("molecule_chembl_id")) %>%
     inner_join(map, by = c("uniprot_id" = "uniprot_id")) %>%
@@ -30,21 +30,6 @@ covid_trials <- drug %>%
 
 covid_trials %>%
     write_tsv(covid_trials_output)
-
-
-## covid19 preclinical studies
-## drug %>%
-##     select(molecule_chembl_id, PRECLINICAL, PREF_NAME) %>%
-##     filter(PRECLINICAL == 1) %>%
-##     inner_join(actives_moa %>%
-##                select(molecule_chembl_id, uniprot_id),
-##                by = c("molecule_chembl_id")) %>%
-##     inner_join(map, by = c("uniprot_id" = "uniprot_id")) %>%
-##     select(-uniprot_id, -molecule_chembl_id) %>%
-##     rename(id = ensembl_id, has_drug_in_covid_preclinical = PRECLINICAL) %>%
-##     distinct() %>%
-##     group_by(id, has_drug_in_covid_preclinical) %>%
-##     summarise(drugs_in_covid_preclinical = paste(PREF_NAME, collapse = ";"))
 
 
 ## covid19 invitro assays
@@ -65,7 +50,7 @@ covid_invitro <- drug %>%
     mutate(newlabel = paste(PREF_NAME, value, paste("(",assay,")", sep = ""))) %>%
     select(molecule_chembl_id, has_invitro_covid_activity, newlabel) %>%
     distinct() %>%
-    inner_join(actives_moa %>%
+    inner_join(moa %>%
                select(molecule_chembl_id, uniprot_id),
                by = c("molecule_chembl_id")) %>%
     inner_join(map, by = c("uniprot_id" = "uniprot_id")) %>%

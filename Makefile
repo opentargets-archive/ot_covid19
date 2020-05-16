@@ -94,7 +94,7 @@ HPA=$(RAWDIR)/hpa.json
 COVIDABUNDACESRAW=$(DATADIR)/bojkova_et_al_nature_covid_abundances.csv
 ## covid-drugs data (from ChEMBL-Aldo)
 DRUGFILE=$(DATADIR)/table_final_drugs_covid.txt
-ACTIVES_MOA_FILE=$(DATADIR)/actives_covid_table_moa.txt
+MOA_FILE=$(DATADIR)/dt_pairs_moa_chembl.txt
 
 ######################################################
 # PARSED FILES - Files with some intermediate parsing
@@ -205,21 +205,6 @@ $(OTBASELINETISSUEMAP):
 $(OTEVIDENCE):
 	$(CURL) $(OTEVIDENCEBUCKET) | $(GUNZIP) -c > $@
 
-$(CHEMBLMOLECULE):
-	$(CURL) $(CHEMBLMOLECULEURL) > $@
-
-$(CHEMBLDRUGINDICATION):
-	$(CURL) $(CHEMBLDRUGINDICATIONURL) > $@
-
-$(CHEMBLTARGETCOMPONENTS):
-	$(CURL) $(CHEMBLTARGETCOMPONENTSURL) > $@
-
-$(CHEMBLTARGETS):
-	$(CURL) $(CHEMBLTARGETSURL) > $@
-
-$(CHEMBLMOA):
-	$(CURL) $(CHEMBLMOAURL) > $@
-
 $(WIKIDATATRIALS):
 	$(CURL) -H "Accept: text/tab-separated-values" -G $(WIKIDATASERVER) --data-urlencode query@$(SRCDIR)/query/clinicalTrials.rq > $@
 
@@ -288,7 +273,7 @@ $(COVID_TARGET_TRIALS) $(COVID_TARGET_INVITRO): $(UNIPROT2ENSEMBL)
 	$(RSCRIPT) $(SRCDIR)/parsers/covid_trials.R \
 	$(UNIPROT2ENSEMBL) \
 	$(DRUGFILE) \
-	$(ACTIVES_MOA_FILE) \
+	$(MOA_FILE) \
 	$(COVID_TARGET_TRIALS) \
 	$(COVID_TARGET_INVITRO) 2>&1 >/dev/null
 
