@@ -2,7 +2,7 @@ import pandas as pd
 import argparse
 import re
 import json
-
+import numpy as np
 
 
 def parse_organism(x):
@@ -134,16 +134,47 @@ def get_all_implicated_interactions(network_df):
     return implicated_df
 
 
+def pool_arrays(s):
+    x = set()
+
+    for e in s:
+        if isinstance(e, list):
+            for a in e:
+                x.add(a)
+    
+    if len(x) > 0:
+        return list(x)
+    else:
+        return np.nan
+
+
 def map_to_ensembl_gene_id(merged, id_map_df):
     
     # Add ensembl gene identifiers when available:
-    merged = merged.merge(id_map_df[['uniprot','id']], how='left', left_on='uniprot_id', right_on='uniprot')
+    merged = merged.merge(id_map_df, how='left', on='uniprot_id')
 
     # Update id column when value is missing:
     merged['id'] = merged.apply(lambda x: x['id'] if x['id'] == x['id'] else x['uniprot_id'], axis=1)
-    
-    # Drop unwanted columns:
-    return merged.drop(['uniprot_id','uniprot'], axis=1)
+    merged.drop(['uniprot_id'], axis=1, inplace=True)
+
+    # Collapsing data:
+    collapsed = []
+    for gene_id, group in merged.groupby(['id']):
+        if len(group) == 1:
+            collapsed += group.to_dict(orient='record')
+        else:
+            try:
+                collapsed.append({
+                    'Implicated_in_viral_infection':group.Implicated_in_viral_infection.any(),
+                    'id':gene_id,
+                    'Covid_direct_interactions': pool_arrays(group.Covid_direct_interactions),
+                    'Covid_indirect_interactions': pool_arrays(group.Covid_indirect_interactions)
+                })
+            except:
+                print(group)
+                raise
+    collapsed_df = pd.DataFrame(collapsed)
+    return collapsed_df
 
 
 def read_human_interactions(human_interactions_file):
@@ -230,8 +261,9 @@ if __name__ == '__main__':
 
     # Reading id mapping file:
     print('[Info] Reading and filtering uniprot mapfile...')
-    id_map_df = pd.read_csv(id_map_file, sep='\t', names=['uniprot','source','id'])
-    id_map_df = id_map_df.loc[id_map_df.source == 'Ensembl']
+    # uniprot_id    ensembl_id
+    id_map_df = pd.read_csv(id_map_file, sep='\t')
+    id_map_df.rename(columns={'ensembl_id':'id'}, inplace=True)
 
     # Reading covid network file:
     print('[Info] Reading and filtering COVID related interactions...')

@@ -100,8 +100,8 @@ MOA_FILE=$(DATADIR)/dt_pairs_moa_chembl.txt
 # PARSED FILES - Files with some intermediate parsing
 ######################################################
 
-## Uniprot
-UNIPROTCOVIDPARSED=$(PREFORMATEDDIR)/targets/uniprot_covid19_parsed.tsv
+## Uniprot - Excalamation mark is added to make sure it is integrated first
+UNIPROTCOVIDPARSED=$(PREFORMATEDDIR)/targets/!uniprot_covid19_parsed.tsv
 ## OT
 OTDRUGEVIDENCE=$(PARSEDDIR)/ot_drug_evidence.tsv
 OTBASELINEPARSED=$(PREFORMATEDDIR)/targets/ot_baseline_expression_per_anatomical_system.tsv
@@ -242,7 +242,7 @@ $(ENSEMBLPARSED) $(UNIPROT2ENSEMBLDRAFT): $(ENSEMBL)
 	$(PIPENV) run python $(SRCDIR)/parsers/ensembl_parser.py -i $(ENSEMBL) -o $(ENSEMBLPARSED) -m $(UNIPROT2ENSEMBLDRAFT)
 
 $(INTACTCOVIDPARSED): $(INTACTCOVID) $(UNIPROTIDMAPPING) $(INTACTHUMAN)
-	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $@ -m  $(UNIPROTIDMAPPING) -f $(INTACTHUMAN)
+	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $@ -m  $(UNIPROT2ENSEMBL) -f $(INTACTHUMAN)
 
 $(OTBASELINEPARSED): $(OTBASELINE) $(OTBASELINETISSUEMAP)
 	$(PIPENV) run python $(SRCDIR)/parsers/baseline_parser.py -i $(OTBASELINE) -m $(OTBASELINETISSUEMAP) -o $@
