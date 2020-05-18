@@ -1,0 +1,34 @@
+---
+title: "COVID data integration report"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    html_preview: true
+---
+
+```{r setup, message=FALSE, echo=FALSE, warning=FALSE, results='hide', include=FALSE}
+library(tidyverse)
+
+descriptors <- read_csv(HEADERSFILE, comment = "#")
+df <- read_tsv(TARGETSINTEGRATED)
+
+```
+
+# Data available
+
+```{r table_nonMissingData, results = 'asis'}
+
+df %>%
+    gather("variable", "value", -ensembl_id) %>%
+    filter(!is.na(value)) %>%
+    filter(value != "") %>%
+    filter(value != FALSE) %>%
+    inner_join(descriptors %>% select(Category, Header), by = c("variable" = "Header")) %>%
+    group_by(variable, Category) %>%
+    summarise(targets = n()) %>%
+    ungroup() %>%
+    mutate(variable = fct_relevel(variable, descriptors$Header)) %>%
+    arrange(variable) %>%
+    knitr::kable()
+
+```

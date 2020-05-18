@@ -59,10 +59,14 @@ ROOTDIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 SRCDIR= $(ROOTDIR)/src
 DATADIR= $(ROOTDIR)/data
 TEMPDIR= $(ROOTDIR)/temp
+DOCSDIR = $(ROOTDIR)/docs
 RAWDIR ?= $(TEMPDIR)/raw_files
 PARSEDDIR ?= $(TEMPDIR)/parsed_tables
 PREFORMATEDDIR ?= $(TEMPDIR)/preformated_tables
 RESULTDIR ?= $(TEMPDIR)/results
+
+REPORT = $(DOCSDIR)/metrics.md
+HEADERSFILE = $(DOCSDIR)/headers.csv
 
 #################################
 # RAW FILES
@@ -137,10 +141,10 @@ DRUGSINTEGRATED=$(RESULTDIR)/drugs_integrated_data.tsv
 #############################################################################
 
 #### Phony targets
-.PHONY: all setup-environment clean-all downloads create-temp parsers integrate
+.PHONY: all setup-environment clean-all downloads create-temp parsers integrate docs
 
 # ALL
-all: setup-environment create-temp downloads parsers integrate
+all: setup-environment create-temp downloads parsers integrate docs
 
 clean-all:
 	rm -rf $(TEMPDIR)
@@ -172,6 +176,16 @@ create-temp:
 
 ## Run integrator:
 integrate: $(TARGETSINTEGRATED) $(DRUGSINTEGRATED)
+
+docs: $(REPORT)
+
+$(REPORT): $(TARGETSINTEGRATED)
+	$(RSCRIPT) --vanilla \
+	-e "setwd('$(SRCDIR)')" \
+	-e "library(rmarkdown)" \
+	-e "HEADERSFILE='$(HEADERSFILE)'" \
+	-e "TARGETSINTEGRATED='$(TARGETSINTEGRATED)'" \
+	-e "rmarkdown::render('$(SRCDIR)/metrics.Rmd', output_format = 'all', output_file = '$@')"
 
 ##
 ## Fetching data:
