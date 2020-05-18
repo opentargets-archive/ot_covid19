@@ -27,9 +27,12 @@ if __name__ == '__main__':
 
     ## Report input data:
     print('[Info] Report on the Ensembl mapping file:')
+    print('[Info] Dropping non-Ensembl gene IDs...')
+    ensembl_map_df = ensembl_map_df.loc[ensembl_map_df.ensembl_id.str.match('ENSG.+')]
     print('[Info] Number of rows: {}'.format(len(ensembl_map_df)))
     print('[Info] Number of unique genes: {}'.format(len(ensembl_map_df.ensembl_id.unique())))
     print('[Info] Number of unique proteins: {}'.format(len(ensembl_map_df.uniprot_id.unique())))
+
     print('')
     print('[Info] Report on the Uniprot mapping file:')
     print('[Info] Number of unique proteins: {}'.format(len(uniprot_map_df.uniprot.unique())))

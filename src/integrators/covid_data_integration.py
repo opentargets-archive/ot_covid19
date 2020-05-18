@@ -247,6 +247,7 @@ def main():
 
     # Reading files from the preformatted folder:
     preformatted_files = [f for f in listdir(input_folder) if isfile(join(input_folder, f))]
+    preformatted_files.sort()   
     print('[Info] Integrating the following files:\n\t{}'.format('\n\t'.join(preformatted_files)))
 
     # 1. Generate first table.
@@ -272,6 +273,10 @@ def main():
         # Testing if table has id:
         if 'id' not in data_df.columns.tolist():
             raise ValueError('The table must have \'id\' column to join.')
+
+        # Skipping data if the id column is not unique:
+        if len(data_df) != len(data_df['id'].unique()):
+            print('[Warning] The \'id\' column in {} file is not unique!'.format(preformatted_file))
 
         # Read or generate join parameters:
         parameters = config_data[preformatted_file] if preformatted_file in config_data else {'columns':data_df.columns.tolist()}
