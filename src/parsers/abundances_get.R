@@ -29,7 +29,11 @@ out <- df %>%
     inner_join(map, by = c("acc" = "uniprot_id")) %>%
     select(-acc) %>%
     rename(id = ensembl_id) %>%
-    distinct()
+    distinct() %>%
+    mutate(abundance_reg_on_covid = str_split(abundance_reg_on_covid, ";")) %>%
+    group_by(id) %>%
+    summarise(is_abundance_reg_on_covid = any(is_abundance_reg_on_covid),
+              abundance_reg_on_covid = paste(unique(unlist(abundance_reg_on_covid)), collapse = ";"))
 
 ## printing output
 out %>%
