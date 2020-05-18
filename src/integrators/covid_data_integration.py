@@ -181,6 +181,15 @@ class TargetDataIntegrator(object):
             (integrated_df['max_phase'] > 2)
         )
 
+        ##
+        ## Adding filter based on covid trials and in vitro assays:
+        ##
+        integrated_df['FILTER_network+covid_tests'] = (
+            (integrated_df['FILTER_network']) |
+            (~integrated_df['has_drug_in_covid_trials'].isna()) |
+            (~integrated_df['has_invitro_covid_activity'].isna())
+        )
+
         # Update dataframe:
         self.ensembl_df = integrated_df
 
