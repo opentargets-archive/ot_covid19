@@ -180,7 +180,7 @@ integrate: $(TARGETSINTEGRATED) $(DRUGSINTEGRATED)
 docs: $(REPORT)
 
 $(REPORT): $(TARGETSINTEGRATED)
-	$(RSCRIPT) --vanilla \
+	$(RSCRIPT) --no-restore --no-save \
 	-e "setwd('$(SRCDIR)')" \
 	-e "library(rmarkdown)" \
 	-e "HEADERSFILE='$(HEADERSFILE)'" \
