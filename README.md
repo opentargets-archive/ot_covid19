@@ -18,6 +18,15 @@ This project is open to contributors.
 
 ## Usage
 
+#### Prerequisites
+The following programs have to be installed and available in order to run the pipeline:
+* Python 3.7
+* [Pipenv](https://github.com/pypa/pipenv): Recommended v2018.11.26 or newer. If using a package manager check the version installed, since version v11.9.0 available in Ubuntu does not work.
+* [jq](https://stedolan.github.io/jq/) 
+* [R](https://www.r-project.org/) 4.0.0
+
+The pipeline has been run successfully with those dependencies on macOS (Catalina) and Ubuntu (20.04 LTS).
+
 #### Run project from scratch
 
 ```bash
