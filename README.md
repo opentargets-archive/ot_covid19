@@ -16,7 +16,38 @@ This project is open to contributors.
 3. Data might be further processed if necessary eg. mapping cross-references, integration with other sources etc.
 4. Pre-processed tables are then picked up by the integrator script(s) and compiled into presentable tables.
 
+## Data sources
+The pipeline integrates information about human and viral targets from the following sources:
+
+|Name|Source|Description|
+| :--- | ------|-----------|
+| Human gene information | Ensembl | Information about human genes |
+| COVID-19 UniProtKB| UniProt | UniProt site with information about SARS and SARS-CoV-2 proteins  |
+| SARS-CoV-2 Complexes | IntAct | Information about SARS-CoV-2 protein complexes |
+| Human - virus interactome| IntAct | Human - SARS-CoV-2 interactome from [Gordon et al. 2020](https://www.nature.com/articles/s41586-020-2286-9) plus intercations of human proteins with proteins of other viruses based on IntAct data |
+| Human interactome| IntAct | Human protein-protein interactions from IntAct database |
+| Baseline expression per anatomical systems | Open Targets | Baseline gene expression per anatomical systems provided by Expression Atlas group used in the Open Targets Platform |
+| Baseline expression distribution and specificity | Human protein Atlas | Information about subcellular location of proteins, tissue distribution and tissue specificity as provided by HPA |
+| Protein expression during SARS-CoV-2 infection| Bojkova et al. 2020 | Information about proteins whose abundance is regulated during viral infection from [Bojkova et al. 2020](https://www.nature.com/articles/s41586-020-2332-7) paper |
+| Target Tractability| Open Targets | [Target tractability assessment for small molecules, antibodies and other modalities provided by ChEMBL and used in the Open Targets Platform](https://docs.targetvalidation.org/getting-started/target-tractability) |
+| Target Safety | Open Targets| [Manually curated target safety data used in the Open Targets Platform](https://docs.targetvalidation.org/getting-started/target-safety)   |
+| Target Drugs | Open Targets | [Information about drugs extracted from the ChEMBL evidence file used in the Open Targets platform](https://docs.targetvalidation.org/data-sources/drugs) |
+| Drugs in COVID-19 clinical trials| ChEMBL| Drugs in clinical trials against COVID-19 |
+| Active compounds in COVID-19 in vitro assays| ChEMBL | Compounds shown to be active in COVID-19 in vitro assays provided by ChEMBL|
+
+Other files not listed in the table are also used for supporting purposes such as gene id mappings.
+
 ## Usage
+
+#### Prerequisites
+The following programs have to be installed and available in order to run the pipeline:
+* Python 3.7
+* [Pipenv](https://github.com/pypa/pipenv): Recommended v2018.11.26 or newer. If using a package manager check the version installed, since version v11.9.0 available in Ubuntu does not work.
+* [jq](https://stedolan.github.io/jq/) 
+* [R](https://www.r-project.org/) 4.0.0
+* [pandoc](https://pandoc.org/installing.html) 1.12.3 or higher
+
+The pipeline has been run successfully with those dependencies on macOS (Catalina) and Ubuntu (20.04 LTS).
 
 #### Run project from scratch
 
