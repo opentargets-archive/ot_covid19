@@ -129,7 +129,7 @@ class TargetDataIntegrator(object):
     
     
     def save_integrated(self, file_name='test.tsv'):
-        integrated = self.ensembl_df
+        integrated = self.ensembl_df.copy()
 
         # Dropping columns:
         integrated.drop(['id', 'MIM_morbidity','COVID_complex_names'], axis=1, inplace=True)
@@ -138,7 +138,8 @@ class TargetDataIntegrator(object):
             integrated.to_csv(file_name, sep='\t', index=False)
         if '.xlsx' in file_name:
             integrated.to_excel(file_name, index=False)
-
+        if '.json' in file_name:
+            integrated.to_json(file_name, lines=True,orient='records',compression='infer')
 
     def map_taxonomy(self):
 
@@ -232,6 +233,8 @@ class DrugDataIntegrator(object):
             self.drug_df.to_csv(file_name, sep='\t', index=False)
         if '.xlsx' in file_name:
             self.drug_df.to_excel(file_name, index=False)
+        if '.json' in file_name:
+            self.drug_df.to_json(file_name, lines=True,orient='records',compression='infer')
 
 
 def main():
@@ -298,8 +301,14 @@ def main():
         integrator_obj.map_taxonomy()
         integrator_obj.add_filter_columns()
 
-    # Save data:
+    # Save data in tsv format:
     integrator_obj.save_integrated(output_file)
+
+    # Save data in json format:
+    if 'tsv' in output_file:
+        integrator_obj.save_integrated(output_file.replace('tsv','json.gz'))
+    if 'xlsx' in output_file:
+        integrator_obj.save_integrated(output_file.replace('xlsx','json.gz'))
 
 
 if __name__ == '__main__':
