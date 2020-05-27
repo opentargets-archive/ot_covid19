@@ -128,6 +128,34 @@ class TargetDataIntegrator(object):
         return self.ensembl_df
     
     
+    def fix_json(self, df):
+        # Columns to fix format:
+        columns_to_json_load = []
+
+        # Get all columns that look like a json array:
+        for column in df.columns:
+            if df[column].astype('str').str.match('\[').any():
+                columns_to_json_load.append(column)
+                
+        # Loop through all the columns and loads list from json formatted string:
+        for col in columns_to_json_load:
+            values = []
+            
+            # Looping through all values and try to convert it a dictionary from json string if it has an array:
+            for value in df[col]:
+                if '[' in str(value):
+                    try:
+                        values.append(json.loads(value))
+                    except:
+                        values.append(value)
+                else:
+                    values.append(value)
+
+            # Update column:
+            df[col] = values
+
+        return df
+
     def save_integrated(self, file_name='test.tsv'):
         integrated = self.ensembl_df.copy()
 
@@ -139,6 +167,7 @@ class TargetDataIntegrator(object):
         if '.xlsx' in file_name:
             integrated.to_excel(file_name, index=False)
         if '.json' in file_name:
+            integrated = self.fix_json(integrated)
             integrated.to_json(file_name, lines=True,orient='records',compression='infer')
 
     def map_taxonomy(self):

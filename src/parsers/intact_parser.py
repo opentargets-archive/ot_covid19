@@ -143,7 +143,7 @@ def pool_arrays(s):
                 x.add(a)
     
     if len(x) > 0:
-        return list(x)
+        return json.dumps(list(x))
     else:
         return np.nan
 
@@ -160,20 +160,19 @@ def map_to_ensembl_gene_id(merged, id_map_df):
     # Collapsing data:
     collapsed = []
     for gene_id, group in merged.groupby(['id']):
-        if len(group) == 1:
-            collapsed += group.to_dict(orient='record')
-        else:
-            try:
-                collapsed.append({
-                    'Implicated_in_viral_infection':group.Implicated_in_viral_infection.any(),
-                    'id':gene_id,
-                    'Covid_direct_interactions': pool_arrays(group.Covid_direct_interactions),
-                    'Covid_indirect_interactions': pool_arrays(group.Covid_indirect_interactions)
-                })
-            except:
-                print(group)
-                raise
+        try:
+            collapsed.append({
+                'Implicated_in_viral_infection':group.Implicated_in_viral_infection.any(),
+                'id':gene_id,
+                'Covid_direct_interactions': pool_arrays(group.Covid_direct_interactions),
+                'Covid_indirect_interactions': pool_arrays(group.Covid_indirect_interactions)
+            })
+        except:
+            print(group)
+            raise
     collapsed_df = pd.DataFrame(collapsed)
+    print(type(collapsed[2]['Covid_indirect_interactions']))
+    print(collapsed[2]['Covid_indirect_interactions'])
     return collapsed_df
 
 
