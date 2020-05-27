@@ -31,8 +31,12 @@ def main():
             parsed_entry['hpa_rna_specific_tissues'] = list(entry['RNA tissue specific NX'].keys()) if entry['RNA tissue specific NX'] is not None  else None
             parsed_entries.append(parsed_entry)
 
-    # Open output gzip file.
     parsed_entries_df = pd.DataFrame(parsed_entries)
+
+    # save columns in JSON format:
+    for column in ['hpa_rna_specific_tissues', 'hpa_subcellular_location']:
+        parsed_entries_df[column] = parsed_entries_df[column].apply(lambda x: json.dumps(x) if isinstance(x, list) else x)
+
     # Save file:
     parsed_entries_df.to_csv(output_file, sep='\t', index=False)
 
