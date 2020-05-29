@@ -120,6 +120,11 @@ class Safety():
         # Write to tsv file
         safety_df = pd.DataFrame.from_dict(self.target_safety_info, orient='index', columns=['name', 'has_safety_risk', 'safety_info_source', 'safety_organs_systems_affected'])
         safety_df.index.name = "id"
+
+        # save columns in JSON format:
+        for column in ['safety_info_source', 'safety_organs_systems_affected']:
+            safety_df[column] = safety_df[column].apply(lambda x: json.dumps(x) if isinstance(x, list) else x)
+
         safety_df.to_csv(output_filename, sep='\t')
 
 def main():

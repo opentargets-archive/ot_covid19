@@ -80,6 +80,10 @@ def parse_baseline(baseline_filename, tissue_mapping, output_filename):
             empty_columns.append(column.replace("is_expressed", "expressed_tissue_list"))
     expression_per_anatomical_systems_df.drop(columns=empty_columns, inplace=True)
 
+    # Save columns that contain lists as valid JSON strings
+    for column in expression_per_anatomical_systems_df.filter(regex="_list").columns:
+        expression_per_anatomical_systems_df[column] = expression_per_anatomical_systems_df[column].apply(lambda x: json.dumps(x) if isinstance(x, list) else x)
+
     # Write to file
     expression_per_anatomical_systems_df.to_csv(output_filename, sep='\t', index=False)
 

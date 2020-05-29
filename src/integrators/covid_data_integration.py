@@ -128,6 +128,37 @@ class TargetDataIntegrator(object):
         return self.ensembl_df
     
     
+    def fix_json(self):
+        df = self.ensembl_df
+
+        # Columns to fix format:
+        columns_to_json_load = []
+
+        # Get all columns that look like a json array:
+        for column in df.columns:
+            if df[column].astype('str').str.match('\[').any():
+                columns_to_json_load.append(column)
+                
+        # Loop through all the columns and loads list from json formatted string:
+        for col in columns_to_json_load:
+            values = []
+            
+            # Looping through all values and try to convert it a dictionary from json string if it has an array:
+            for value in df[col]:
+                if '[' in str(value):
+                    try:
+                        values.append(json.loads(value))
+                    except:
+                        values.append(value)
+                else:
+                    values.append(value)
+
+            # Update column:
+            df[col] = values
+
+        # Update dataframe:
+        self.ensembl_df = df
+
     def save_integrated(self, file_name='test.tsv'):
         integrated = self.ensembl_df.copy()
 
@@ -300,8 +331,10 @@ def main():
     if entity_type == "targets":
         integrator_obj.map_taxonomy()
         integrator_obj.add_filter_columns()
+        # Format target table as proper JSON
+        integrator_obj.fix_json()
 
-    # Save data in tsv format:
+    # Save data in tsv format
     integrator_obj.save_integrated(output_file)
 
     # Save data in json format:
