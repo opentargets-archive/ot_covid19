@@ -331,10 +331,8 @@ def main():
     if entity_type == "targets":
         integrator_obj.map_taxonomy()
         integrator_obj.add_filter_columns()
-
-    # Save data in tsv format:
-    integrator_obj.fix_json()
-    integrator_obj.save_integrated(output_file)
+        # Formst target table as proper JSON
+        integrator_obj.fix_json()
 
     # Save data in json format:
     if 'tsv' in output_file:
