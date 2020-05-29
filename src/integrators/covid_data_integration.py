@@ -128,7 +128,9 @@ class TargetDataIntegrator(object):
         return self.ensembl_df
     
     
-    def fix_json(self, df):
+    def fix_json(self):
+        df = self.ensembl_df
+
         # Columns to fix format:
         columns_to_json_load = []
 
@@ -154,7 +156,8 @@ class TargetDataIntegrator(object):
             # Update column:
             df[col] = values
 
-        return df
+        # Update dataframe:
+        self.ensembl_df = df
 
     def save_integrated(self, file_name='test.tsv'):
         integrated = self.ensembl_df.copy()
@@ -167,7 +170,6 @@ class TargetDataIntegrator(object):
         if '.xlsx' in file_name:
             integrated.to_excel(file_name, index=False)
         if '.json' in file_name:
-            integrated = self.fix_json(integrated)
             integrated.to_json(file_name, lines=True,orient='records',compression='infer')
 
     def map_taxonomy(self):
@@ -331,6 +333,7 @@ def main():
         integrator_obj.add_filter_columns()
 
     # Save data in tsv format:
+    integrator_obj.fix_json()
     integrator_obj.save_integrated(output_file)
 
     # Save data in json format:
