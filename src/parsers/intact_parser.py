@@ -192,6 +192,10 @@ def read_human_interactions(human_interactions_file):
         for line in f:
             interaction = json.loads(line)
 
+            # Skip if interactors are missing:
+            if (not interaction['interactorB']) or (not interaction['interactorA']):
+                continue
+
             # Skip rows where the source is not uniprot:
             if interaction['interactorA']['id_source'] != 'uniprotkb':
                 continue
