@@ -13,15 +13,15 @@ UNIPROTCOVIDQUERY="https://www.ebi.ac.uk/uniprot/api/covid-19/uniprotkb/download
 UNIPROTIDMAPPINGURL=ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/HUMAN_9606_idmapping.dat.gz
 
 # OT files
-OTTRACTABILITYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/tractability_buckets-2020-03-26.tsv
-OTKNOWNTARGETSAFETYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/known_target_safety-2020-04-01.json
-OTEXPERIMENTALTOXICITYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/experimental-toxicity-2020-04-07.tsv
-OTBASELINEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/input/annotation-files/exp_summary_NormCounts_genes_all_Blueprint2_v2-2020-04-01.txt
+OTTRACTABILITYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.06/input/annotation-files/tractability_buckets-2020-05-14.tsv
+OTKNOWNTARGETSAFETYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.06/input/annotation-files/known_target_safety-2020-06-01.json
+OTEXPERIMENTALTOXICITYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.06/input/annotation-files/experimental-toxicity-2020-04-07.tsv
+OTBASELINEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.06/input/annotation-files/baseline_expression_counts-2020-05-07.tsv
 OTBASELINETISSUEMAPGITHUB=https://raw.githubusercontent.com/opentargets/expression_hierarchy/master/process/map_with_efos.json
-OTEVIDENCEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.04/output/20.04_evidence_data.json.gz
+OTEVIDENCEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.06/output/20.06_evidence_data.json.gz
 
 # Ensembl json
-ENSEMBLURL = ftp://ftp.ensembl.org/pub/release-99/json/homo_sapiens/homo_sapiens.json
+ENSEMBLURL = ftp://ftp.ensembl.org/pub/release-100/json/homo_sapiens/homo_sapiens.json
 
 # COVID complex file:
 COVIDCOMPLEXURL=http://ftp.ebi.ac.uk/pub/databases/IntAct/complex/current/complextab/sars-cov-2.tsv
