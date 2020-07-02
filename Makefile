@@ -30,7 +30,7 @@ COVIDCOMPLEXURL=http://ftp.ebi.ac.uk/pub/databases/IntAct/complex/current/comple
 INTACTCOVIDURL="https://www.ebi.ac.uk/intact/export?format=mitab_27&query=annot%3A%22dataset%3ACoronavirus%22&negative=false&spoke=false&ontology=false&sort=intact-miscore&asc=false"
 
 # Full human intact data:
-INTACTHUMANURL='ftp://ftp.ebi.ac.uk/pub/databases/intact/various/ot_graphdb/2020-03-30/data/protein_pair_interactions.json'
+INTACTHUMANURL='ftp://ftp.ebi.ac.uk/pub/databases/intact/various/ot_graphdb/2020-05-20/data/interactor_pair_interactions.json'
 
 # HPA
 HPAURL=https://www.proteinatlas.org/download/proteinatlas.json.gz
