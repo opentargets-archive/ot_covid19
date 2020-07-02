@@ -192,16 +192,27 @@ def read_human_interactions(human_interactions_file):
         for line in f:
             interaction = json.loads(line)
 
-            if interaction["mi_score"] is None:
+            # Skip rows where the source is not uniprot:
+            if interaction['interactorA']['id_source'] != 'uniprotkb':
+                continue
+            if interaction['interactorB']['id_source'] != 'uniprotkb':
                 continue
 
-            # Applying MI score threshold for interactions:
-            if interaction["mi_score"] > .45:
+            # Skipping interaction with no interaction score:
+            if not interaction['interaction']['interaction_score']:
+                continue
+
+            # Skipping interaction with low score:
+            if interaction['interaction']['interaction_score'] < 0.45:
+                continue
+
+            # Looping through all evidence:
+            for evidence in interaction['interaction']['evidence']:
 
                 all_human_interactions.append({
-                    'interactor_a':interaction['interactorA_uniprot_name'].split('-')[0],
-                    'interactor_b':interaction['interactorB_uniprot_name'].split('-')[0],
-                    'interaction_identifier': interaction['interaction_identifier']
+                    'interactor_a':interaction['interactorA']['id'],
+                    'interactor_b':interaction['interactorB']['id'],
+                    'interaction_identifier': evidence['interaction_identifier']
                 })
 
     # return dataframe with all human interactions (~520k)

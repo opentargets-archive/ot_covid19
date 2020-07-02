@@ -1,6 +1,6 @@
 COVID data integration report
 ================
-26 May, 2020
+02 July, 2020
 
 # Data available
 
@@ -19,7 +19,8 @@ df %>%
     knitr::kable()
 ```
 
-    ## Warning: Unknown levels in `f`: ensembl_id, drugs_in_covid_trials
+    ## Warning: Unknown levels in `f`: ensembl_id, Covid_indirect_interactions,
+    ## drugs_in_covid_trials
 
 | variable                                     | Category                         | targets |
 | :------------------------------------------- | :------------------------------- | ------: |
@@ -29,12 +30,11 @@ df %>%
 | description                                  | TARGET INFO                      |   65599 |
 | uniprot\_ids                                 | TARGET INFO                      |   24139 |
 | COVID-19 UniprotKB                           | TARGET INFO                      |      38 |
-| FILTER\_network                              | FILTERS                          |    4188 |
-| FILTER\_network+drug                         | FILTERS                          |     165 |
-| FILTER\_network+covid\_tests                 | FILTERS                          |    4668 |
-| Covid\_direct\_interactions                  | PROTEIN INTERACTIONS             |     515 |
-| Covid\_indirect\_interactions                | PROTEIN INTERACTIONS             |    3758 |
-| Implicated\_in\_viral\_infection             | PROTEIN INTERACTIONS             |     698 |
+| FILTER\_network                              | FILTERS                          |    1001 |
+| FILTER\_network+drug                         | FILTERS                          |      56 |
+| FILTER\_network+covid\_tests                 | FILTERS                          |    1540 |
+| Covid\_direct\_interactions                  | PROTEIN INTERACTIONS             |     771 |
+| Implicated\_in\_viral\_infection             | PROTEIN INTERACTIONS             |     968 |
 | max\_phase                                   | DRUGS FOR TARGET                 |    1174 |
 | drugs\_in\_clinic                            | DRUGS FOR TARGET                 |    1174 |
 | has\_invitro\_covid\_activity                | DRUGS FOR TARGET                 |     541 |
