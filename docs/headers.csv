@@ -41,3 +41,4 @@ TARGET SAFETY,has_safety_risk,Open Targets,Whether or not there is any safety ri
 TARGET SAFETY,safety_info_source,Open Targets,"Source of the safety risk info.
 Options are: known target safety (Literature, HeCaTos), experimental toxicity (eTox, TOX21) or both",https://docs.targetvalidation.org/getting-started/target-safety
 TARGET SAFETY,safety_organs_systems_affected,Open Targets,List of organs where there are known safety risks for the target,https://docs.targetvalidation.org/getting-started/target-safety
+LITERATURE,covid_literature,Open Targets,Number of manuscripts with sentences citing the target in the context of COVID-19,https://docs.targetvalidation.org/data-sources/text-mining
