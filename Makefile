@@ -134,6 +134,9 @@ COVIDABUNDANCES=$(PREFORMATEDDIR)/targets/covid_abundances.tsv
 ## covid-related drug data
 COVID_TARGET_TRIALS=$(PREFORMATEDDIR)/targets/covid_target_trials.tsv
 COVID_TARGET_INVITRO=$(PREFORMATEDDIR)/targets/covid_target_invitro.tsv
+## OT literature
+OTLITERATUREPARSED=$(PARSEDDIR)/ot_covid_literature_parsed.tsv
+OTLITERATUREPREFORMATED=$(PREFORMATEDDIR)/targets/ot_covid_literature.tsv
 
 ## integrated tables
 TARGETSINTEGRATED=$(RESULTDIR)/targets_integrated_data.tsv
@@ -163,7 +166,8 @@ downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABIL
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) \
 		$(ENSEMBLPARSED) $(OTBASELINEPARSED) $(HPAPREFORMATTED) $(DRUGFORTARGETPARSED) \
 		$(OTTRACTABILITYPARSED) $(OTSAFETYPARSED) $(COMPLEXPREFORMATTED) $(DRUGSPARSED) $(DRUGSCOVID19TRIALSPARSED) \
-		$(UNIPROT2ENSEMBL) $(COVIDABUNDANCES) $(COVIDABUNDANCES) $(COVID_TARGET_TRIALS) $(COVID_TARGET_INVITRO)
+		$(UNIPROT2ENSEMBL) $(COVIDABUNDANCES) $(COVIDABUNDANCES) $(COVID_TARGET_TRIALS) $(COVID_TARGET_INVITRO) \
+		$(OTLITERATUREPREFORMATED)
 
 
 # CREATES TEMPORARY DIRECTORY
@@ -245,6 +249,12 @@ $(UNIPROTCOVIDPARSED): $(UNIPROTCOVIDFLATFILE)
 
 $(OTDRUGEVIDENCE):
 	$(JQ) -r 'select(.sourceID == "chembl") | [.target.id, .disease.id, .drug.id, .evidence.drug2clinic.clinical_trial_phase.numeric_index, .evidence.target2drug.action_type, .drug.molecule_name] | @tsv' $(OTEVIDENCE) | $(SED) -e 's/http:\/\/identifiers.org\/chembl.compound\///g' > $@
+
+$(OTLITERATUREPARSED):
+	$(JQ) -r 'select(.sourceID == "europepmc" and .disease.id == "MONDO_0100096") | [.target.id, .disease.id, .literature.references[].lit_id] | @tsv' $(OTEVIDENCE) > $@
+
+$(OTLITERATUREPREFORMATED): $(OTLITERATUREPARSED)
+	$(RSCRIPT) $(SRCDIR)/parsers/literature_get.R $(OTLITERATUREPARSED) $@
 
 $(COVIDCOMPLEXPARSED): $(COVIDCOMPLEX)
 	$(PIPENV) run python $(SRCDIR)/parsers/complex_parser.py -i $(COVIDCOMPLEX) -o $(COVIDCOMPLEXPARSED)
