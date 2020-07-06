@@ -6,7 +6,10 @@ outputFile <- args[2]
 
 
 df <- read_tsv(file = inputFile, comment = "", col_types = cols()) %>%
-    setNames(c("id", "disease", "literature"))
+    setNames(c("id", "disease", "literature")) %>%
+    ## black-list SARS1 target
+    filter(id != "ENSG00000031698")
+
 
 ## reading, renaming, grouping, summarise
 out <- df %>%

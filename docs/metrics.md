@@ -1,6 +1,6 @@
 COVID data integration report
 ================
-03 July, 2020
+06 July, 2020
 
 # Data available
 
@@ -56,5 +56,4 @@ df %>%
 | has\_safety\_risk                            | TARGET SAFETY                    |     481 |
 | safety\_info\_source                         | TARGET SAFETY                    |     481 |
 | safety\_organs\_systems\_affected            | TARGET SAFETY                    |     235 |
-| covid\_literature                            | LITERATURE                       |     123 |
-
+| covid\_literature                            | LITERATURE                       |     122 |
