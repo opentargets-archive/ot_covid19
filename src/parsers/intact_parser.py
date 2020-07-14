@@ -68,7 +68,7 @@ def get_direct_interactors(input_df):
             tax_id = filtered_interact.loc[ filtered_interact.id_b == interactor ].taxid_b.tolist()[0]
         
         aggregated_interactions.append({
-            'uniprot_id': interactor,
+            'uniprot_id': interactor.split('-')[0],
             'Covid_direct_interactions': interaction_ids,
             'tax_id': tax_id
         })
@@ -90,32 +90,20 @@ def get_second_level_interactions(indirect_interactions_list, human_interactions
     # 
     secondary_interactions = {}
     for index, row in second_level_interactions.iterrows():
-        if row['interactor_a'] in indirect_interactions_list and row['interactor_b'] in indirect_interactions_list:
-            # Adding interactor A:
-            try:
-                secondary_interactions[row['interactor_a']] += row['interaction_identifier']
-            except: 
-                secondary_interactions[row['interactor_a']] = row['interaction_identifier']
 
+        if row['interactor_a'] in indirect_interactions_list:
             # Adding interactor B:
             try:
-                secondary_interactions[row['interactor_b']] += row['interaction_identifier']
+                secondary_interactions[row['interactor_b']].append(row['interaction_identifier'])
             except: 
-                secondary_interactions[row['interactor_b']] = row['interaction_identifier']
+                secondary_interactions[row['interactor_b']] = [row['interaction_identifier']] 
 
-        elif row['interactor_a'] in indirect_interactions_list:
-            # Adding interactor B:
-            try:
-                secondary_interactions[row['interactor_b']] += row['interaction_identifier']
-            except: 
-                secondary_interactions[row['interactor_b']] = row['interaction_identifier'] 
-
-        elif row['interactor_b'] in indirect_interactions_list:
+        if row['interactor_b'] in indirect_interactions_list:
             # Adding interactor A:
             try:
-                secondary_interactions[row['interactor_a']] += row['interaction_identifier']
+                secondary_interactions[row['interactor_a']].append(row['interaction_identifier'])
             except: 
-                secondary_interactions[row['interactor_a']] = row['interaction_identifier'] 
+                secondary_interactions[row['interactor_a']] = [row['interaction_identifier']] 
 
     # Return dataframe with indirect interactions:        
     return pd.DataFrame({'uniprot_id': list(secondary_interactions.keys()), 
@@ -135,13 +123,18 @@ def get_all_implicated_interactions(network_df):
 
 
 def pool_arrays(s):
+    """
+    pd.Series -> serialized json
+    """
     x = set()
 
     for e in s:
-        if isinstance(e, list):
+        try:
             for a in e:
                 x.add(a)
-    
+        except TypeError:
+            continue
+
     if len(x) > 0:
         return json.dumps(list(x))
     else:
@@ -171,8 +164,6 @@ def map_to_ensembl_gene_id(merged, id_map_df):
             print(group)
             raise
     collapsed_df = pd.DataFrame(collapsed)
-    print(type(collapsed[2]['Covid_indirect_interactions']))
-    print(collapsed[2]['Covid_indirect_interactions'])
     return collapsed_df
 
 
@@ -214,8 +205,8 @@ def read_human_interactions(human_interactions_file):
             for evidence in interaction['interaction']['evidence']:
 
                 all_human_interactions.append({
-                    'interactor_a':interaction['interactorA']['id'],
-                    'interactor_b':interaction['interactorB']['id'],
+                    'interactor_a':interaction['interactorA']['id'].split('-')[0],
+                    'interactor_b':interaction['interactorB']['id'].split('-')[0],
                     'interaction_identifier': evidence['interaction_identifier']
                 })
 
@@ -228,6 +219,11 @@ def read_and_filter_covid_interactions(network_file):
     # Reading tsv file:
     network_df = pd.read_csv(network_file, sep='\t')
 
+    # Drop rows where the source is other than uniprot:
+    network_df['source_a'] = network_df['#ID(s) interactor A'].apply(lambda x: x.split(':')[0])
+    network_df['source_b'] = network_df['ID(s) interactor B'].apply(lambda x: x.split(':')[0])
+    network_df = network_df.loc[(network_df.source_a == 'uniprotkb') & (network_df.source_b == 'uniprotkb')]
+
     # Parse taxonomy IDs:
     network_df['taxid_a'] = network_df['Taxid interactor A'].apply(parse_organism)
     network_df['taxid_b'] = network_df['Taxid interactor B'].apply(parse_organism)
@@ -235,10 +231,10 @@ def read_and_filter_covid_interactions(network_file):
     # Parse interaction identifier:
     network_df['interaction_id'] = (network_df['Interaction identifier(s)']
         .apply(lambda x: x.split('|')[0].replace('intact:','')))
-
-    # Parse interactor id:
-    network_df['id_a'] = network_df['#ID(s) interactor A'].apply(lambda x: x.split(':')[1].split('-PRO')[0])
-    network_df['id_b'] = network_df['ID(s) interactor B'].apply(lambda x: x.split(':')[1].split('-PRO')[0])
+ 
+    # Parse interactor id: removing protein suffix:
+    network_df['id_a'] = network_df['#ID(s) interactor A'].apply(lambda x: x.split(':')[1].split('-')[0])
+    network_df['id_b'] = network_df['ID(s) interactor B'].apply(lambda x: x.split(':')[1].split('-')[0])
 
     return network_df[['id_a','taxid_a','id_b','taxid_b','interaction_id']]
 
@@ -290,17 +286,25 @@ if __name__ == '__main__':
     # Get direct interactors:
     print('[Info] Generating table with direct interactors of COVID proteins...')
     direct_interactions_df = get_direct_interactors(network_df)
+    # direct_interactions_df = direct_interactions_df.uniprot_id.st.replace(re.)
+    print(direct_interactions_df.loc[direct_interactions_df.uniprot_id.str.match(r"-", case=False)])
+    print(direct_interactions_df.head())
 
     # Get a unique list of uniprot IDs of direct interactors:
     indirect_interactions_list = direct_interactions_df.loc[direct_interactions_df.tax_id == '9606'].uniprot_id.tolist()
 
     # Get indirect interactors:
     print('[Info] Generating table with indirect interactors of COVID proteins...')
+
     indirect_interactions_df = get_second_level_interactions(indirect_interactions_list, human_interactions_df)
+    print('[Info] Number of indirect interactions: {}'.format(len(indirect_interactions_df)))
 
     # Mark any human proteins implicated in viral pathogenesis:
     print('[Info] Generating table with human proteins implicated in viral infection...')
     implicated_proteins = get_all_implicated_interactions(network_df)
+
+    print(direct_interactions_df.head())
+    print(indirect_interactions_df.head())
 
     ##
     ## Merge and save:
@@ -312,9 +316,15 @@ if __name__ == '__main__':
     merged = merged.merge(implicated_proteins, on='uniprot_id', how='outer')
     merged['Implicated_in_viral_infection'] = merged['Implicated_in_viral_infection'].apply(lambda x: x if x is True else False)
 
+    print(len(merged))
+    print(len(merged.loc[~merged.Covid_indirect_interactions.isna()]))
+
     # Adding Ensembl IDs:
     print('[Info] Adding Ensembl gene IDs.')
     final_df = map_to_ensembl_gene_id(merged,id_map_df)
+    print(final_df.columns)
+    print(len(final_df.loc[~final_df.Covid_indirect_interactions.isna()]))
+    print('[Info] Number of primary + secondary interactions: {}'.format(len(final_df)))
 
     # Save output file:
     final_df.to_csv(output_file, sep='\t', index=False)
