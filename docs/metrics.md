@@ -31,14 +31,14 @@ df %>%
 | COVID-19 UniprotKB                           | TARGET INFO                      |      38 |
 | FILTER\_network                              | FILTERS                          |    5424 |
 | FILTER\_network+drug                         | FILTERS                          |     220 |
-| FILTER\_network+covid\_tests                 | FILTERS                          |    5869 |
+| FILTER\_network+covid\_tests                 | FILTERS                          |    5880 |
 | Covid\_direct\_interactions                  | PROTEIN INTERACTIONS             |     746 |
 | Covid\_indirect\_interactions                | PROTEIN INTERACTIONS             |    4921 |
 | Implicated\_in\_viral\_infection             | PROTEIN INTERACTIONS             |     957 |
 | max\_phase                                   | DRUGS FOR TARGET                 |    1174 |
 | drugs\_in\_clinic                            | DRUGS FOR TARGET                 |    1174 |
-| has\_invitro\_covid\_activity                | DRUGS FOR TARGET                 |     541 |
-| invitro\_covid\_activity                     | DRUGS FOR TARGET                 |     541 |
+| has\_invitro\_covid\_activity                | DRUGS FOR TARGET                 |     569 |
+| invitro\_covid\_activity                     | DRUGS FOR TARGET                 |     569 |
 | has\_drug\_in\_covid\_trials                 | DRUGS FOR TARGET                 |     109 |
 | hpa\_subcellular\_location                   | BASELINE GENE EXPRESSION         |   12382 |
 | hpa\_rna\_tissue\_distribution               | BASELINE GENE EXPRESSION         |   19635 |
