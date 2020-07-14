@@ -137,7 +137,6 @@ class TargetDataIntegrator(object):
         # Get all columns that look like a json array:
         for column in df.columns:
             if df[column].astype('str').str.match('\[').any():
-                print('jsonify: {}'.format(column))
                 columns_to_json_load.append(column)
                 
         # Loop through all the columns and loads list from json formatted string:
@@ -150,7 +149,6 @@ class TargetDataIntegrator(object):
                     try:
                         values.append(json.loads(value))
                     except:
-                        print('failed to convert: {}'.format(value))
                         values.append(value)
                 else:
                     values.append(value)
