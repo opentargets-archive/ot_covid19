@@ -144,13 +144,21 @@ DRUGSINTEGRATED=$(RESULTDIR)/drugs_integrated_data.tsv
 #############################################################################
 
 #### Phony targets
-.PHONY: all setup-environment clean-all downloads create-temp parsers integrate docs
+.PHONY: all setup-environment clean-all clean-parsed clean-results downloads create-temp parsers integrate docs
 
 # ALL
 all: setup-environment create-temp downloads parsers integrate docs
 
 clean-all:
 	rm -rf $(TEMPDIR)
+
+clean-parsed:
+	rm -rf $(TEMPDIR)/parsed_tables
+	rm -rf $(TEMPDIR)/preformated_tables
+	rm -rf $(TEMPDIR)/results
+
+clean-results:
+	rm -f $(TEMPDIR)/results
 
 ## Setup environment
 setup-environment:
