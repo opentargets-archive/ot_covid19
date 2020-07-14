@@ -286,25 +286,18 @@ if __name__ == '__main__':
     # Get direct interactors:
     print('[Info] Generating table with direct interactors of COVID proteins...')
     direct_interactions_df = get_direct_interactors(network_df)
-    # direct_interactions_df = direct_interactions_df.uniprot_id.st.replace(re.)
-    print(direct_interactions_df.loc[direct_interactions_df.uniprot_id.str.match(r"-", case=False)])
-    print(direct_interactions_df.head())
 
     # Get a unique list of uniprot IDs of direct interactors:
     indirect_interactions_list = direct_interactions_df.loc[direct_interactions_df.tax_id == '9606'].uniprot_id.tolist()
 
     # Get indirect interactors:
     print('[Info] Generating table with indirect interactors of COVID proteins...')
-
     indirect_interactions_df = get_second_level_interactions(indirect_interactions_list, human_interactions_df)
     print('[Info] Number of indirect interactions: {}'.format(len(indirect_interactions_df)))
 
     # Mark any human proteins implicated in viral pathogenesis:
     print('[Info] Generating table with human proteins implicated in viral infection...')
     implicated_proteins = get_all_implicated_interactions(network_df)
-
-    print(direct_interactions_df.head())
-    print(indirect_interactions_df.head())
 
     ##
     ## Merge and save:
@@ -316,14 +309,9 @@ if __name__ == '__main__':
     merged = merged.merge(implicated_proteins, on='uniprot_id', how='outer')
     merged['Implicated_in_viral_infection'] = merged['Implicated_in_viral_infection'].apply(lambda x: x if x is True else False)
 
-    print(len(merged))
-    print(len(merged.loc[~merged.Covid_indirect_interactions.isna()]))
-
     # Adding Ensembl IDs:
     print('[Info] Adding Ensembl gene IDs.')
     final_df = map_to_ensembl_gene_id(merged,id_map_df)
-    print(final_df.columns)
-    print(len(final_df.loc[~final_df.Covid_indirect_interactions.isna()]))
     print('[Info] Number of primary + secondary interactions: {}'.format(len(final_df)))
 
     # Save output file:
