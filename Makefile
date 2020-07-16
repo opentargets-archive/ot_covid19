@@ -19,6 +19,7 @@ OTEXPERIMENTALTOXICITYBUCKET=https://storage.googleapis.com/open-targets-data-re
 OTBASELINEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.06/input/annotation-files/baseline_expression_counts-2020-05-07.tsv
 OTBASELINETISSUEMAPGITHUB=https://raw.githubusercontent.com/opentargets/expression_hierarchy/master/process/map_with_efos.json
 OTEVIDENCEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.06/output/20.06_evidence_data.json.gz
+OTTARGETLISTBUCKET='https://storage.googleapis.com/open-targets-data-releases/20.06/output/20.06_target_list.csv.gz'
 
 # Ensembl json
 ENSEMBLURL = ftp://ftp.ensembl.org/pub/release-100/json/homo_sapiens/homo_sapiens.json
@@ -30,7 +31,7 @@ COVIDCOMPLEXURL=http://ftp.ebi.ac.uk/pub/databases/IntAct/complex/current/comple
 INTACTCOVIDURL="https://www.ebi.ac.uk/intact/export?format=mitab_27&query=annot%3A%22dataset%3ACoronavirus%22&negative=false&spoke=false&ontology=false&sort=intact-miscore&asc=false"
 
 # Full human intact data:
-INTACTHUMANURL='ftp://ftp.ebi.ac.uk/pub/databases/intact/various/ot_graphdb/2020-05-20/data/interactor_pair_interactions.json'
+INTACTHUMANURL='ftp://ftp.ebi.ac.uk/pub/databases/intact/various/ot_graphdb/current/data/interactor_pair_interactions.json'
 
 # HPA
 HPAURL=https://www.proteinatlas.org/download/proteinatlas.json.gz
@@ -86,6 +87,7 @@ OTEXPERIMENTALTOXICITY=$(RAWDIR)/ot_experimental_toxicity.tsv
 OTBASELINE=$(RAWDIR)/ot_baseline.txt
 OTBASELINETISSUEMAP=$(RAWDIR)/ot_map_with_efos.json
 OTEVIDENCE=$(RAWDIR)/ot_evidence.json
+OTTARGETLIST=$(RAWDIR)/target_list.csv.gz
 ## Drugs
 WIKIDATATRIALS=$(RAWDIR)/wiki_trials.tsv
 ## Interactions
@@ -168,7 +170,7 @@ setup-environment:
 ## Downlad files
 downloads: create-temp $(UNIPROTCOVIDFLATFILE) $(UNIPROTIDMAPPING) $(OTTRACTABILITY) $(OTKNOWNTARGETSAFETY) $(OTEXPERIMENTALTOXICITY) \
 	$(OTBASELINE) $(OTBASELINETISSUEMAP) $(OTEVIDENCE) $(COVIDCOMPLEX) $(INTACTCOVID) \
-	$(WIKIDATATRIALS) $(ENSEMBL) $(HPA) $(INTACTHUMAN)
+	$(WIKIDATATRIALS) $(ENSEMBL) $(HPA) $(INTACTHUMAN) $(OTTARGETLIST)
 
 ## TODO: OTDRUGEVIDENCE not yet fully parsed to agreed format.- just a placeholder
 parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTCOVIDPARSED) \
@@ -233,6 +235,9 @@ $(OTBASELINETISSUEMAP):
 $(OTEVIDENCE):
 	$(CURL) $(OTEVIDENCEBUCKET) | $(GUNZIP) -c > $@
 
+$(OTTARGETLIST):
+	$(CURL) $(OTTARGETLISTBUCKET) > $@	
+
 $(WIKIDATATRIALS):
 	$(CURL) -H "Accept: text/tab-separated-values" -G $(WIKIDATASERVER) --data-urlencode query@$(SRCDIR)/query/clinicalTrials.rq > $@
 
@@ -271,7 +276,7 @@ $(COMPLEXPREFORMATTED): $(COVIDCOMPLEX) $(COVIDCOMPLEXPARSED)
 	$(PIPENV) run python $(SRCDIR)/parsers/complex_portal_parser.py -i $(COVIDCOMPLEXPARSED) -o $(COMPLEXPREFORMATTED)
 
 $(ENSEMBLPARSED) $(UNIPROT2ENSEMBLDRAFT): $(ENSEMBL)
-	$(PIPENV) run python $(SRCDIR)/parsers/ensembl_parser.py -i $(ENSEMBL) -o $(ENSEMBLPARSED) -m $(UNIPROT2ENSEMBLDRAFT)
+	$(PIPENV) run python $(SRCDIR)/parsers/ensembl_parser.py -i $(ENSEMBL) -o $(ENSEMBLPARSED) -m $(UNIPROT2ENSEMBLDRAFT) -t $(OTTARGETLIST)
 
 $(INTACTCOVIDPARSED): $(INTACTCOVID) $(UNIPROT2ENSEMBL) $(INTACTHUMAN)
 	$(PIPENV) run python $(SRCDIR)/parsers/intact_parser.py -i $(INTACTCOVID) -o $@ -m  $(UNIPROT2ENSEMBL) -f $(INTACTHUMAN)

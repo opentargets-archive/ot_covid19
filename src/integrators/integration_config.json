@@ -1,18 +1,25 @@
 {
-    "!uniprot_covid19_parsed.tsv": {
-        "columns": [], 
-        "flag": true, 
-        "flag_label": "COVID-19 UniprotKB", 
-        "how": "outer", 
-        "columns_to_map": {
-            "taxon_id": "taxon_id",
-            "uniprot_ids": "primary_accession"
+    "integration_recipes": {
+        "!uniprot_covid19_parsed.tsv": {
+            "columns": [], 
+            "flag": true, 
+            "flag_label": "COVID-19 UniprotKB", 
+            "how": "outer", 
+            "columns_to_map": {
+                "taxon_id": "taxon_id",
+                "uniprot_ids": "primary_accession"
+            }
+        },
+        "ot_baseline_expression_per_anatomical_system.tsv":{
+            "columns": ["id","immune_system_is_expressed", "immune_system_expressed_tissue_list", "respiratory_system_is_expressed", "respiratory_system_expressed_tissue_list"]
+        },
+        "ot_target_safety.tsv":{
+            "columns": ["id", "has_safety_risk", "safety_info_source", "safety_organs_systems_affected"]
         }
     },
-    "ot_baseline_expression_per_anatomical_system.tsv":{
-        "columns": ["id","immune_system_is_expressed", "immune_system_expressed_tissue_list", "respiratory_system_is_expressed", "respiratory_system_expressed_tissue_list"]
-    },
-    "ot_target_safety.tsv":{
-        "columns": ["id", "has_safety_risk", "safety_info_source", "safety_organs_systems_affected"]
+    "columns_fix": {
+        "boolean_fix": ["Implicated_in_viral_infection", "has_drug_in_covid_trials", "respiratory_system_is_expressed", "immune_system_is_expressed", "has_safety_risk", "is_abundance_reg_on_covid"],
+        "integer_fix": ["max_phase", "drugs_in_clinic"],
+        "null_fix": ["has_drug_in_covid_trials", "has_safety_risk"]
     }
 }

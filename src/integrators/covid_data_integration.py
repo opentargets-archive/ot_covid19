@@ -126,8 +126,26 @@ class TargetDataIntegrator(object):
     
     def get_integrated_data(self):
         return self.ensembl_df
-    
-    
+
+
+    def fix_data(self, recipes):
+        df = self.ensembl_df    
+
+        # Fix boolean columns:
+        boolean_cols = recipes['boolean_fix']
+        df[boolean_cols] = df[boolean_cols].astype('boolean')
+
+        # Fix integer columns:
+        integer_cols = recipes['integer_fix']
+        df[integer_cols] = df[integer_cols].astype('Int64')
+
+        # Converting nulls:
+        for col in recipes['null_fix']:
+            df.loc[df[col].isnull(), col] = False
+
+        # Update data:
+        self.ensembl_df = df
+
     def fix_json(self):
         df = self.ensembl_df
 
@@ -158,6 +176,7 @@ class TargetDataIntegrator(object):
 
         # Update dataframe:
         self.ensembl_df = df
+
 
     def save_integrated(self, file_name='test.tsv'):
         integrated = self.ensembl_df.copy()
@@ -322,17 +341,25 @@ def main():
             print('[Warning] The \'id\' column in {} file is not unique!'.format(preformatted_file))
 
         # Read or generate join parameters:
-        parameters = config_data[preformatted_file] if preformatted_file in config_data else {'columns':data_df.columns.tolist()}
+        parameters = config_data["integration_recipes"][preformatted_file] if preformatted_file in config_data["integration_recipes"] else {'columns':data_df.columns.tolist()}
 
         # Integrating:
         integrator_obj.add_data(data_df, parameters)
 
-    # Map taxonomy to species and apply filters:
+    # Performing target specific tasks:
     if entity_type == "targets":
+        # Map taxonomy to species and apply filters:
         integrator_obj.map_taxonomy()
+    
+        # Adding filter columns:
         integrator_obj.add_filter_columns()
+
+        # Apply fixes in columns:
+        integrator_obj.fix_data(config_data["columns_fix"])
+
         # Format target table as proper JSON
         integrator_obj.fix_json()
+
 
     # Save data in tsv format
     integrator_obj.save_integrated(output_file)

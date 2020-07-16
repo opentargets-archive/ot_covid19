@@ -52,6 +52,20 @@ def get_MIM_morbidity(xrefs):
     return morbidities
 
 
+def get_target_list(targetList_file):
+    """
+    1. Open OT target list file as dataframe, 
+    2. Filter for genes with at least one association
+    3. Drop unused columns
+    4. Rename used columns
+    """
+    df = pd.read_csv(targetList_file, sep=',', compression='gzip')
+    df = df.loc[df.number_of_associations > 0]
+
+    # Returning 
+    return df.ensembl_id
+
+
 def main():
     
     # Parse command line arguments
@@ -60,6 +74,7 @@ def main():
     parser.add_argument('-i', '--input', help='Ensembl JSON input file name.', required=True, type=str)
     parser.add_argument('-o', '--output', help='Output file name.', required=True, type=str)
     parser.add_argument('-m', '--mappingFile', help='Name of output UniProt to Ensembl id mapping file', type=str, default='uniprot2ensembl.tsv')
+    parser.add_argument('-t', '--targetListFile', help='Name of the OpenTargets target list file', type=str)
 
     args = parser.parse_args()
 
@@ -67,6 +82,10 @@ def main():
     input_file = args.input
     output_file = args.output
     mapping_file = args.mappingFile
+    targetList_file = args.targetListFile
+
+    # Get OT target list:
+    target_list = get_target_list(targetList_file)
 
     # Open output gzip file.
     output_file_handle = gzip.open(output_file, 'wt')
@@ -74,12 +93,16 @@ def main():
     # Dictionary to store UniProt id to Ensembl mapping
     uniprot2ensembl_map = {}
 
-    # OPen and looping through all ensembl genes:
+    # Open and looping through all ensembl genes:
     with open(input_file, 'r') as i:
         for line in i:        
             # Read data:
             try:
                 data = json.loads(line.strip())
+
+                # Skipp gene if not found in the OT target list:
+                if data['id'] not in target_list.unique():
+                    continue
                 
                 # Parse fields:
                 parsed_data = parsing_ensembl_json(data)
@@ -101,6 +124,8 @@ def main():
 
     # Save UniProt to Ensembl  mapping as a tsv
     uniprot2ensembl_df = pd.DataFrame.from_dict({'uniprot_id': list(uniprot2ensembl_map.keys()), 'ensembl_id': list(uniprot2ensembl_map.values())}, orient='columns').explode('ensembl_id')
+
+    # 
     uniprot2ensembl_df.to_csv(mapping_file, sep='\t', header=True, index=False)
 
 
