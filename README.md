@@ -34,6 +34,7 @@ The pipeline integrates information about human and viral targets from the follo
 | Target Drugs | Open Targets | [Information about drugs extracted from the ChEMBL evidence file used in the Open Targets platform](https://docs.targetvalidation.org/data-sources/drugs) |
 | Drugs in COVID-19 clinical trials| ChEMBL| Drugs in clinical trials against COVID-19 |
 | Active compounds in COVID-19 in vitro assays| ChEMBL | Compounds shown to be active in COVID-19 in vitro assays provided by ChEMBL|
+| Mendelian randomization | Open Targets | |
 
 Other files not listed in the table are also used for supporting purposes such as gene id mappings.
 

@@ -101,6 +101,8 @@ COVIDABUNDACESRAW=$(DATADIR)/bojkova_et_al_nature_covid_abundances.csv
 ## covid-drugs data (from ChEMBL-Aldo)
 DRUGFILE=$(DATADIR)/table_final_drugs_covid.txt
 MOA_FILE=$(DATADIR)/dt_pairs_moa_chembl.txt
+## MR hits from Mohd 
+MR_FILE=$(DATADIR)/gsmr_covid_tool_7_9_2020.csv
 
 ######################################################
 # PARSED FILES - Files with some intermediate parsing
@@ -139,6 +141,9 @@ COVID_TARGET_INVITRO=$(PREFORMATEDDIR)/targets/covid_target_invitro.tsv
 ## OT literature
 OTLITERATUREPARSED=$(PARSEDDIR)/ot_covid_literature_parsed.tsv
 OTLITERATUREPREFORMATED=$(PREFORMATEDDIR)/targets/ot_covid_literature.tsv
+## MR table:
+MRPREFORMATED=$(PREFORMATEDDIR)/targets/mr_hits.tsv
+
 
 ## integrated tables
 TARGETSINTEGRATED=$(RESULTDIR)/targets_integrated_data.tsv
@@ -177,7 +182,7 @@ parsers: $(OTDRUGEVIDENCE) $(UNIPROTCOVIDPARSED) $(COVIDCOMPLEXPARSED) $(INTACTC
 		$(ENSEMBLPARSED) $(OTBASELINEPARSED) $(HPAPREFORMATTED) $(DRUGFORTARGETPARSED) \
 		$(OTTRACTABILITYPARSED) $(OTSAFETYPARSED) $(COMPLEXPREFORMATTED) $(DRUGSPARSED) $(DRUGSCOVID19TRIALSPARSED) \
 		$(UNIPROT2ENSEMBL) $(COVIDABUNDANCES) $(COVIDABUNDANCES) $(COVID_TARGET_TRIALS) $(COVID_TARGET_INVITRO) \
-		$(OTLITERATUREPREFORMATED)
+		$(OTLITERATUREPREFORMATED) $(MRPREFORMATED)
 
 
 # CREATES TEMPORARY DIRECTORY
@@ -307,6 +312,9 @@ $(UNIPROT2ENSEMBL): $(ENSEMBLPARSED) $(UNIPROTIDMAPPING)
 
 $(COVIDABUNDANCES): $(UNIPROT2ENSEMBL)
 	$(RSCRIPT) $(SRCDIR)/parsers/abundances_get.R $(COVIDABUNDACESRAW) $(UNIPROT2ENSEMBL) $@ 2>&1 >/dev/null
+
+$(MRPREFORMATED): $(ENSEMBLPARSED) $(MR_FILE)
+	$(PIPENV) run python $(SRCDIR)/parsers/mr_parser.py -i $(MR_FILE) -o $@ -e $(ENSEMBLPARSED)
 
 $(COVID_TARGET_TRIALS) $(COVID_TARGET_INVITRO): $(UNIPROT2ENSEMBL)
 	$(RSCRIPT) $(SRCDIR)/parsers/covid_trials.R \
