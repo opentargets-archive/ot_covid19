@@ -47,7 +47,7 @@ def table_formatter(row):
     
     # Initialize return value:
     returnvalue = {
-        'gene_name': row['Gene_or_Protein'],
+        'gene_name': row['Gene_or_Protein'].split('_')[0],
         'MR_field': json.dumps(mr_data),
         'colocalization': json.dumps(coloc_data)
     }
