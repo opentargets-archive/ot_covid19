@@ -32,7 +32,7 @@ def table_formatter(row):
     
     mr_data = { 
         'Dataset': dataset,
-        'MR estimate': row['MR_estimate'],
+        'MR estimate': round(row['MR_estimate'],3),
         'Lower conf.int': round(row['lower_ci'],3),
         'Upper conf.int': round(row['upper_ci'],3),
         'p-value': pval
@@ -48,8 +48,8 @@ def table_formatter(row):
     # Initialize return value:
     returnvalue = {
         'gene_name': row['Gene_or_Protein'].split('_')[0],
-        'MR_field': json.dumps(mr_data),
-        'colocalization': json.dumps(coloc_data)
+        'MR_field': mr_data,
+        'colocalization': coloc_data
     }
     
     return returnvalue
@@ -118,7 +118,7 @@ def main():
     pooled_df = pd.DataFrame(pooled_data)
     
     # Save data:
-    pooled_df.to_csv(mr_file_parsed, sep='\t', index=False)
+    pooled_df.to_csv(mr_file_parsed, sep='\t', index=False, doublequote=False, quotechar="'")
 
 
 if __name__ == '__main__':
