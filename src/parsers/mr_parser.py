@@ -32,6 +32,7 @@ def table_formatter(row):
     
     mr_data = { 
         'Dataset': dataset,
+        'Number of SNPs': row['nSNPs'],
         'MR estimate': round(row['MR_estimate'],3),
         'Lower conf.int': round(row['lower_ci'],3),
         'Upper conf.int': round(row['upper_ci'],3),
@@ -40,7 +41,6 @@ def table_formatter(row):
     
     # Generate field for colocalization:
     coloc_data = {
-        'Number of SNPs': row['nSNPs'],
         'Colocalising SNP': row['colocalising_SNP'],
         'Prosterior probability': row['coloc_posterior_probability_H4']
     }
@@ -112,7 +112,7 @@ def main():
         pooled_data.append({
             'id': gene_id,
             'MR_field': json.dumps(group.MR_field.tolist()),
-            'colocalization': json.dumps(group.colocalization.tolist())
+            'colocalisation': json.dumps(group.colocalization.tolist())
         })
 
     pooled_df = pd.DataFrame(pooled_data)
