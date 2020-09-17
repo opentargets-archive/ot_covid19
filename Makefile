@@ -102,7 +102,7 @@ COVIDABUNDACESRAW=$(DATADIR)/bojkova_et_al_nature_covid_abundances.csv
 DRUGFILE=$(DATADIR)/table_final_drugs_covid.txt
 MOA_FILE=$(DATADIR)/dt_pairs_moa_chembl.txt
 ## MR hits from Mohd 
-MR_FILE=$(DATADIR)/gsmr_covid_tool_7_9_2020.csv
+MR_FILE=$(DATADIR)/gsmr_covid_tool_v2.csv
 
 ######################################################
 # PARSED FILES - Files with some intermediate parsing
