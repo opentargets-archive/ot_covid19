@@ -41,15 +41,18 @@ def table_formatter(row):
     
     # Generate field for colocalization:
     coloc_data = {
-        'Colocalising SNP': row['colocalising_SNP'],
-        'Prosterior probability': row['coloc_posterior_probability_H4']
+        'Dataset': dataset,
+        'Candidate SNP': row['colocalising_SNP'],
+        'Posterior probability': row['coloc_posterior_probability_H4']
     }
     
     # Initialize return value:
     returnvalue = {
         'gene_name': row['Gene_or_Protein'].split('_')[0],
         'MR_field': mr_data,
-        'colocalization': coloc_data
+        'colocalisation': coloc_data,
+        'pval': row['pval'],
+        'coloc_posterior_probability_H4': row['coloc_posterior_probability_H4']
     }
     
     return returnvalue
@@ -109,10 +112,11 @@ def main():
     # As the id column is not unique, we have to pool the MR results:
     pooled_data = []
     for gene_id, group in merged.groupby('id'):
+
         pooled_data.append({
             'id': gene_id,
-            'MR_field': json.dumps(group.MR_field.tolist()),
-            'colocalisation': json.dumps(group.colocalization.tolist())
+            'MR_field': json.dumps(group.sort_values('pval',ascending=True).MR_field.tolist()),
+            'colocalisation': json.dumps(group.sort_values('coloc_posterior_probability_H4',ascending=False).colocalisation.tolist())
         })
 
     pooled_df = pd.DataFrame(pooled_data)
