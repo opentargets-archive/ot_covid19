@@ -12,7 +12,7 @@ def map_primary_uniprot_accession_to_ensembl(row):
     URL = 'http://rest.ensembl.org/xrefs/symbol/{}/{}?content-type=application/json&object_type=gene'.format(
         organism,accession)
 
-    response = requests.get(URL).json()
+    response = requests.get(URL, verify=False).json()
 
     if 'error' in response:
         print('[Warning] Could not find Ensembl gene ID to {}'.format(accession))
