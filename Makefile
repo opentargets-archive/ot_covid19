@@ -13,25 +13,25 @@ UNIPROTCOVIDQUERY="https://www.ebi.ac.uk/uniprot/api/covid-19/uniprotkb/stream?f
 UNIPROTIDMAPPINGURL=ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/HUMAN_9606_idmapping.dat.gz
 
 # OT files
-OTTRACTABILITYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.09/input/annotation-files/tractability_buckets-2020-08-14.tsv
-OTKNOWNTARGETSAFETYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.09/input/annotation-files/known_target_safety-2020-09-02.json
-OTEXPERIMENTALTOXICITYBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.09/input/annotation-files/experimental-toxicity-2020-04-07.tsv
-OTBASELINEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.09/input/annotation-files/baseline_expression_counts-2020-05-07.tsv
+OTTRACTABILITYBUCKET="https://storage.googleapis.com/open-targets-data-releases/21.02/input/annotation-files/tractability_buckets-2021-01-12.tsv"
+OTKNOWNTARGETSAFETYBUCKET=https://storage.googleapis.com/open-targets-data-releases/21.02/input/annotation-files/known_target_safety-2021-02-09.json
+OTEXPERIMENTALTOXICITYBUCKET=https://storage.googleapis.com/open-targets-data-releases/21.02/input/annotation-files/experimental-toxicity-2020-04-07.tsv
+OTBASELINEBUCKET=https://storage.googleapis.com/open-targets-data-releases/21.02/input/annotation-files/baseline_expression_counts-2020-05-07.tsv
 OTBASELINETISSUEMAPGITHUB=https://raw.githubusercontent.com/opentargets/expression_hierarchy/master/process/map_with_efos.json
-OTEVIDENCEBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.09/output/20.09_evidence_data.json.gz
-OTTARGETLISTBUCKET=https://storage.googleapis.com/open-targets-data-releases/20.09/output/20.09_target_list.csv.gz
+OTEVIDENCEBUCKET=https://storage.googleapis.com/open-targets-data-releases/21.02/output/21.02_evidence_data.json.gz
+OTTARGETLISTBUCKET=https://storage.googleapis.com/open-targets-data-releases/21.02/output/21.02_target_list.csv.gz
 
 # Ensembl json
-ENSEMBLURL = ftp://ftp.ensembl.org/pub/release-100/json/homo_sapiens/homo_sapiens.json
+ENSEMBLURL = ftp://ftp.ensembl.org/pub/release-102/json/homo_sapiens/homo_sapiens.json
 
 # COVID complex file:
-COVIDCOMPLEXURL=http://ftp.ebi.ac.uk/pub/databases/IntAct/complex/2020-09-25/complextab/sars-cov-2.tsv
+COVIDCOMPLEXURL=http://ftp.ebi.ac.uk/pub/databases/IntAct/complex/2020-11-05/complextab/sars-cov-2.tsv
 
 # IntAct COVID related interaction query:
 INTACTCOVIDURL="https://www.ebi.ac.uk/intact/export?format=mitab_27&query=annot%3A%22dataset%3ACoronavirus%22&negative=false&spoke=false&ontology=false&sort=intact-miscore&asc=false"
 
 # Full human intact data:
-INTACTHUMANURL='ftp://ftp.ebi.ac.uk/pub/databases/intact/various/ot_graphdb/2020-10-05/data/interactor_pair_interactions.json'
+INTACTHUMANURL='ftp://ftp.ebi.ac.uk/pub/databases/intact/various/ot_graphdb/2021-01-18/data/interactor_pair_interactions.json'
 
 # HPA
 HPAURL=https://www.proteinatlas.org/download/proteinatlas.json.gz
