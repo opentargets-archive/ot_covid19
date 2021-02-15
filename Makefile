@@ -17,7 +17,7 @@ OTTRACTABILITYBUCKET="https://storage.googleapis.com/open-targets-data-releases/
 OTKNOWNTARGETSAFETYBUCKET=https://storage.googleapis.com/open-targets-data-releases/21.02/input/annotation-files/known_target_safety-2021-02-09.json
 OTEXPERIMENTALTOXICITYBUCKET=https://storage.googleapis.com/open-targets-data-releases/21.02/input/annotation-files/experimental-toxicity-2020-04-07.tsv
 OTBASELINEBUCKET=https://storage.googleapis.com/open-targets-data-releases/21.02/input/annotation-files/baseline_expression_counts-2020-05-07.tsv
-OTBASELINETISSUEMAPGITHUB=https://raw.githubusercontent.com/opentargets/expression_hierarchy/master/process/map_with_efos.json #func
+OTBASELINETISSUEMAPGITHUB=https://raw.githubusercontent.com/opentargets/expression_hierarchy/master/process/map_with_efos.json
 OTEVIDENCEBUCKET=https://storage.googleapis.com/open-targets-data-releases/21.02/output/21.02_evidence_data.json.gz
 OTTARGETLISTBUCKET=https://storage.googleapis.com/open-targets-data-releases/21.02/output/21.02_target_list.csv.gz
 
