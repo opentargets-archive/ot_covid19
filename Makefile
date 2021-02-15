@@ -13,13 +13,13 @@ UNIPROTCOVIDQUERY="https://www.ebi.ac.uk/uniprot/api/covid-19/uniprotkb/stream?f
 UNIPROTIDMAPPINGURL=ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/HUMAN_9606_idmapping.dat.gz
 
 # OT files
-OTTRACTABILITYBUCKET=https://storage.cloud.google.com/open-targets-data-releases/21.02/input/annotation-files/tractability_buckets-2021-01-12.tsv
+OTTRACTABILITYBUCKET="https://storage.cloud.google.com/open-targets-data-releases/21.02/input/annotation-files/tractability_buckets-2021-01-12.tsv"
 OTKNOWNTARGETSAFETYBUCKET=https://storage.cloud.google.com/open-targets-data-releases/21.02/input/annotation-files/known_target_safety-2021-02-09.json
 OTEXPERIMENTALTOXICITYBUCKET=https://storage.cloud.google.com/open-targets-data-releases/21.02/input/annotation-files/experimental-toxicity-2020-04-07.tsv
 OTBASELINEBUCKET=https://storage.cloud.google.com/open-targets-data-releases/21.02/input/annotation-files/baseline_expression_counts-2020-05-07.tsv
-OTBASELINETISSUEMAPGITHUB=https://raw.githubusercontent.com/opentargets/expression_hierarchy/master/process/map_with_efos.json
+OTBASELINETISSUEMAPGITHUB=https://raw.githubusercontent.com/opentargets/expression_hierarchy/master/process/map_with_efos.json #func
 OTEVIDENCEBUCKET=https://storage.cloud.google.com/open-targets-data-releases/21.02/output/21.02_evidence_data.json.gz
-OTTARGETLISTBUCKET=https://storage.googleapis.com/open-targets-data-releases/21.02/output/21.02_target_list.json.gz
+OTTARGETLISTBUCKET=https://storage.googleapis.com/open-targets-data-releases/21.02/output/21.02_target_list.csv.gz
 
 # Ensembl json
 ENSEMBLURL = ftp://ftp.ensembl.org/pub/release-102/json/homo_sapiens/homo_sapiens.json
