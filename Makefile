@@ -45,12 +45,33 @@ WIKIDATASERVER=https://query.wikidata.org/bigdata/namespace/wdq/sparql
 
 # bins
 CURL ?= $(shell which curl)
+ifeq ($(CURL),)
+$(error command "curl" not found)
+endif
 GUNZIP ?= $(shell which gunzip)
+ifeq ($(GUNZIP),)
+$(error command "gunzip" not found)
+endif
 JQ ?= $(shell which jq)
+ifeq ($(JQ),)
+$(error command "jq" not found)
+endif
 SED ?= $(shell which sed)
+ifeq ($(SED),)
+$(error command "sed" not found)
+endif
 PIPENV ?= $(shell which pipenv)
+ifeq ($(PIPENV),)
+$(error command "pipenv" not found)
+endif
 R ?= $(shell which R)
+ifeq ($(R),)
+$(error command "R" not found)
+endif
 RSCRIPT ?= $(shell which Rscript)
+ifeq ($(RSCRIPT),)
+$(error command "Rscript" not found)
+endif
 
 #################################
 # Paths (DIRECTORIES)
