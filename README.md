@@ -1,5 +1,9 @@
 # COVID19 Open Targets data integration
 
+**February 2022 Update:**
+
+The Open Targets COVID-19 Target Prioritisation Tool has been deprecated and archived. For more information, please see [opentargets/platform#1964](https://github.com/opentargets/platform/issues/1964) and [this Community thread](https://community.opentargets.org/t/open-targets-covid-19-target-prioritisation-tool-deprecation-and-archive-notice/430).
+
 ## Aim
 Centralise publicly available datasets in order to build a Virus – Host Target Knowledgebase for Drug Target Selection. 
 
@@ -7,7 +11,7 @@ A full description of the project vision is [here](https://drive.google.com/open
 Some of the questions the project is trying to answer [here](https://docs.google.com/document/d/1Tcc0lhu5YqT3-fY5N4EzPjYtd-dcKhM5y-Lu1TqGD30/edit#heading=h.clav1w5t1yv0)
 
 ## Contributors
-This project is open to contributors.
+This project is now closed to contributors.
 
 ## Data flow
 
